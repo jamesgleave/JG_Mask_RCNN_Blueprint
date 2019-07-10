@@ -15,3 +15,10 @@ The goal of this repository is to create system for generalized and easily confi
 
 ![Instance Segmentation Sample](assets/balloon_color_splash.gif)
 
+
+# Getting started
+
+The first step is to download the coco weights
+  -[The COCO weights](https://www.dropbox.com/s/acoxck93wmuq151/mask_rcnn_coco.h5?dl=0)
+
+Secondly, you can optionally download the [coin and balloon dataset]()
