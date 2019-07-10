@@ -4,11 +4,14 @@ This is an implementation to matterport's [Mask_RCNN repository](https://github.
 
 ![Instance Segmentation Sample](assets/street.png)
 
-# About this repository
-
-Contents: 
+The repository contains: 
   - All files contained in the [parent repository](https://github.com/matterport/Mask_RCNN)
   - An added "CoinCounter" class, which counts the total value of coins in a photo
-  - A "Blueprint" directory, which contains a blackbox class config, a blackbox inspect_model and a blackbox inspect_data .py file.
-  
+  - A "Blueprint" directory, which contains a blackbox blueprint_class, a blackbox blueprint_inspect_model and a blackbox           blueprint_inspect_data .py file.
+ 
+# About the blueprint
+
+The goal of this repository is to create system for generalized and easily configurable object detection and segmentation. The blueprint class streamlines the processes of training, testing and inference.
+
+![Instance Segmentation Sample](assets/balloon_color_splash.gif)
 
