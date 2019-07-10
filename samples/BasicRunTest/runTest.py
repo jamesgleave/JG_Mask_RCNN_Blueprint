@@ -102,5 +102,5 @@ def defineImage(filePath):
     visualize.display_instances(im, r['rois'], r['masks'], r['class_ids'],
                                     class_names, r['scores'])
 
-# runThroughDir("/Users/martingleave/Mask_RCNN/ms_test_art")
-defineImage("/Users/martingleave/Mask_RCNN/images/25691390_f9944f61b5_z.jpg")
+# Enter the path of an image here.
+defineImage("Path/To/Image/")
