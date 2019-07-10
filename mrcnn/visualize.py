@@ -82,7 +82,7 @@ def apply_mask(image, mask, color, alpha=0.5):
 
 def display_instances(image, boxes, masks, class_ids, class_names,
                       scores=None, title="",
-                      figsize=(16, 16), ax=None,
+                      figsize=(8, 8), ax=None,
                       show_mask=True, show_bbox=True,
                       colors=None, captions=None):
     """

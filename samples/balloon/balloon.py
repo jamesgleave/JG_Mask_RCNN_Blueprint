@@ -8,6 +8,10 @@ Written by Waleed Abdulla
 
 ------------------------------------------------------------
 
+
+python3 /Users/martingleave/Mask_RCNN/samples/balloon/balloon.py train
+--dataset=/Users/martingleave/Mask_RCNN/datasets/balloon --weights=coco
+
 Usage: import the module (see Jupyter notebooks for examples), or run from
        the command line as such:
 
