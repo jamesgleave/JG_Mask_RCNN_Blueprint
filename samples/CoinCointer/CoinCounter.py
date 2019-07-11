@@ -462,7 +462,7 @@ if __name__ == '__main__':
                "Provide --image or --video to apply color splash"
     elif args.command == "inference":
         assert args.image,\
-               "Provide --image= (image path) or (directory path)"
+               "Provide --image=(image path) or (directory path)"
 
     print("Weights: ", args.weights)
     print("Dataset: ", args.dataset)
@@ -487,9 +487,6 @@ if __name__ == '__main__':
     else:
         model = modellib.MaskRCNN(mode="inference", config=config,
                                   model_dir=args.logs)
-
-    if args.command == "inference":
-        inference(model_inf=model, path=args.image)
 
     # Select weights file to load
     if args.weights.lower() == "coco":
@@ -523,6 +520,8 @@ if __name__ == '__main__':
     elif args.command == "splash":
         detect_and_color_splash(model, image_path=args.image,
                                 video_path=args.video)
+    elif args.command == "inference":
+        inference(model_inf=model, path=args.image)
     else:
         print("'{}' is not recognized. "
               "Use 'train' or 'splash'".format(args.command))
