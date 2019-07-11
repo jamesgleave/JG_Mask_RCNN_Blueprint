@@ -62,9 +62,6 @@ class BlueprintConfig(Config):
     Derives from the base Config class and overrides some values.
     """
 
-    def set_hyperparameters(self):
-        return
-
     # Give the configuration a recognizable name
     NAME = "Blueprint"
 
