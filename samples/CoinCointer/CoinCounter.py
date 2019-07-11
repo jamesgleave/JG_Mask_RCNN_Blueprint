@@ -18,6 +18,7 @@ sys.path.append(ROOT_DIR)  # To find local version of the library
 from mrcnn.config import Config
 from mrcnn import model as modellib, utils
 from mrcnn import visualize
+from tensorflow.python.client import device_lib
 
 # Path to trained weights file
 COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
@@ -33,7 +34,7 @@ DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 
 # *********************************************************************************************************** #
 #                                 HOW TO TRAIN THE MODEL WITH COCO WEIGHTS                                    #
-#        sudo python3 samples/CoinCointer/CoinCounter.py train --dataset=datasets/coin/ --weights=coco
+#             python3 samples/CoinCointer/CoinCounter.py train --dataset=datasets/coin/ --weights=coco
 # *********************************************************************************************************** #
 
 # *********************************************************************************************************** #
@@ -42,11 +43,17 @@ DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 #                     --dataset=datasets/coin/ --weights=last --logs=logs/CoinCounterLogs
 # *********************************************************************************************************** #
 
+# *********************************************************************************************************** #
+#                                      HOW TO RUN INFERENCE ON A TRAINED MODEL                                #
+#                 python3 samples/CoinCointer/CoinCounter.py inference --image=datasets/coin/val
+# *********************************************************************************************************** #
+
 
 class CoinConfig(Config):
     """Configuration for training on the coin dataset.
     Derives from the base Config class and overrides some values.
     """
+
     # Give the configuration a recognizable name
     NAME = "coin"
 
@@ -64,6 +71,14 @@ class CoinConfig(Config):
     LEARNING_MOMENTUM = 0.9
 
     DETECTION_MIN_CONFIDENCE = 0.5
+
+
+def get_available_devices():
+    local_device_protos = device_lib.list_local_devices()
+    return [x.name for x in local_device_protos if x.device_type == 'GPU']
+
+
+print("The available devices are", get_available_devices())
 
 
 ############################################################
