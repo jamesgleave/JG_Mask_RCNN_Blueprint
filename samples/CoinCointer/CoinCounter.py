@@ -55,7 +55,7 @@ class CoinConfig(Config):
     NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
 
     # Number of training steps per epoch
-    STEPS_PER_EPOCH = 100
+    STEPS_PER_EPOCH = 40
 
     # Skip detections with < 90% confidence
     DETECTION_MIN_CONFIDENCE = 0.9
