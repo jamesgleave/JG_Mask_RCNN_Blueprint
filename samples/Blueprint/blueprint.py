@@ -57,6 +57,10 @@ class BlueprintConfig(Config):
     """Configuration for training on the blueprint dataset.
     Derives from the base Config class and overrides some values.
     """
+
+    def set_hyperparameters(self):
+        return
+
     # Give the configuration a recognizable name
     NAME = "Blueprint"
 
@@ -74,7 +78,6 @@ class BlueprintConfig(Config):
     DETECTION_MIN_CONFIDENCE = 0.9
 
     # Check the config class for more information
-
 
 ############################################################
 #  Data-set
