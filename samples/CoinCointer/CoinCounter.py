@@ -408,7 +408,7 @@ def define_image(file_path, model_inf, class_names):
     results = model_inf.detect([im], verbose=1)
     r = results[0]
     visualize.display_instances(im, r['rois'], r['masks'], r['class_ids'],
-                                class_names, r['scores'])
+                                class_names, r['scores'], figsize=(8,8))
 
 
 def inference(path, model_inf):
@@ -434,7 +434,7 @@ if __name__ == '__main__':
         description='Train Mask R-CNN to detect coins.')
     parser.add_argument("command",
                         metavar="<command>",
-                        help="'train', 'splash' or 'inference'")
+                        help="'train' or 'splash' or 'inference'")
     parser.add_argument('--dataset', required=False,
                         metavar="/path/to/coin/dataset/",
                         help='Directory of the coin dataset')
