@@ -422,7 +422,6 @@ def inference_image(file_path, model_inf, class_names):
 
 def inference_dir(file_path, model_inf, class_names):
     for im in glob.iglob(pathname=file_path + "/*.jpg"):
-        im = skimage.io.imread(file_path)
         results = model_inf.detect([im], verbose=1)
         r = results[0]
         visualize.display_instances(im, r['rois'], r['masks'], r['class_ids'],
