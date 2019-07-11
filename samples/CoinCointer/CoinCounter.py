@@ -421,12 +421,20 @@ def inference_image(file_path, model_inf, class_names):
 
 
 def inference_dir(file_path, model_inf, class_names):
+    im_list = []
+    r_list = []
     for path in glob.iglob(pathname=file_path + "/*.jpg"):
         im = skimage.io.imread(path)
+        im_list.append(im)
+
         results = model_inf.detect([im], verbose=1)
-        r = results[0]
-        visualize.display_instances(im, r['rois'], r['masks'], r['class_ids'],
+        r_list.append(results[0])
+
+    i = 0
+    for r in r_list:
+        visualize.display_instances(im_list[i], r['rois'], r['masks'], r['class_ids'],
                                     class_names, r['scores'], figsize=(8, 8))
+        i += 1
 
 
 def inference(path, model_inf):
