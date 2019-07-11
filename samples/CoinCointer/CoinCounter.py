@@ -63,7 +63,7 @@ class CoinConfig(Config):
     LEARNING_RATE = 0.0007
     LEARNING_MOMENTUM = 0.9
 
-    DETECTION_MIN_CONFIDENCE = 0.5
+    DETECTION_MIN_CONFIDENCE = 0.7
 
 
 ############################################################
