@@ -256,10 +256,23 @@ class CoinDataset(utils.Dataset):
 
     def get_class_names(self):
         class_name_list = []
-        for name in self.class_info["name"]:
+        print("Classes:")
+        for obj in self.class_info:
+            print("- ", obj["name"])
+            name = obj["name"]
             class_name_list.append(name)
 
         return class_name_list
+
+    def load_inference_classes(self):
+
+        # This loads in the classes for inference only
+        self.add_class("Coin", 1, "penny")
+        self.add_class("Coin", 2, "nickel")
+        self.add_class("Coin", 3, "dime")
+        self.add_class("Coin", 4, "quarter")
+        self.add_class("Coin", 5, "loonie")
+        self.add_class("Coin", 6, "toonie")
 
 
 def train(model):
@@ -385,16 +398,12 @@ CoinCounter_MODEL_PATH = os.path.join(ROOT_DIR, "logs/CoinCounterLogsTwo__LowerL
 # Directory of images to run detection on
 IMAGE_DIR = os.path.join(ROOT_DIR, "datasets/coin/val")
 
-# My Class names
-ds = CoinDataset()
-class_names = ds.get_class_names()
-
 # Load a random image from the images folder
 # file_names = next(os.walk(IMAGE_DIR))[2]
 # image = skimage.io.imread(os.path.join(IMAGE_DIR, random.choice(file_names)))
 
 
-def define_image(file_path, model_inf):
+def define_image(file_path, model_inf, class_names):
     im = skimage.io.imread(file_path)
     results = model_inf.detect([im], verbose=1)
     r = results[0]
@@ -403,7 +412,13 @@ def define_image(file_path, model_inf):
 
 
 def inference(path, model_inf):
-    define_image(path, model_inf)
+
+    # My Class names
+    inference_dataset = CoinDataset()
+    inference_dataset.load_inference_classes()
+    class_names = inference_dataset.get_class_names()
+
+    define_image(path, model_inf, class_names)
 
 
 ############################################################
