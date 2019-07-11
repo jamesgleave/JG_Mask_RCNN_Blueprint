@@ -406,7 +406,7 @@ IMAGE_DIR = os.path.join(ROOT_DIR, "datasets/coin/val")
 
 
 def define_path(file_path, model_inf, class_names):
-    if os.path.isdir():
+    if os.path.isdir(file_path):
         inference_dir(file_path, model_inf, class_names)
     else:
         inference_image(file_path, model_inf, class_names)
@@ -421,7 +421,8 @@ def inference_image(file_path, model_inf, class_names):
 
 
 def inference_dir(file_path, model_inf, class_names):
-    for im in glob.iglob(pathname=file_path + "/*.jpg"):
+    for path in glob.iglob(pathname=file_path + "/*.jpg"):
+        im = skimage.io.imread(path)
         results = model_inf.detect([im], verbose=1)
         r = results[0]
         visualize.display_instances(im, r['rois'], r['masks'], r['class_ids'],
