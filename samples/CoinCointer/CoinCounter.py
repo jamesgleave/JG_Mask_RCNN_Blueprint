@@ -405,12 +405,28 @@ IMAGE_DIR = os.path.join(ROOT_DIR, "datasets/coin/val")
 # image = skimage.io.imread(os.path.join(IMAGE_DIR, random.choice(file_names)))
 
 
-def define_image(file_path, model_inf, class_names):
+def define_path(file_path, model_inf, class_names):
+    if os.path.isdir():
+        inference_dir(file_path, model_inf, class_names)
+    else:
+        inference_image(file_path, model_inf, class_names)
+
+
+def inference_image(file_path, model_inf, class_names):
     im = skimage.io.imread(file_path)
     results = model_inf.detect([im], verbose=1)
     r = results[0]
     visualize.display_instances(im, r['rois'], r['masks'], r['class_ids'],
-                                class_names, r['scores'], figsize=(8,8))
+                                class_names, r['scores'], figsize=(8, 8))
+
+
+def inference_dir(file_path, model_inf, class_names):
+    for im in glob.iglob(pathname=file_path + "/*.jpg"):
+        im = skimage.io.imread(file_path)
+        results = model_inf.detect([im], verbose=1)
+        r = results[0]
+        visualize.display_instances(im, r['rois'], r['masks'], r['class_ids'],
+                                    class_names, r['scores'], figsize=(8, 8))
 
 
 def inference(path, model_inf):
@@ -420,7 +436,7 @@ def inference(path, model_inf):
     inference_dataset.load_inference_classes()
     class_names = inference_dataset.get_class_names()
 
-    define_image(path, model_inf, class_names)
+    define_path(path, model_inf, class_names)
 
 
 ############################################################
