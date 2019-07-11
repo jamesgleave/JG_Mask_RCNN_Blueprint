@@ -58,7 +58,7 @@ class BlueprintConfig(Config):
     Derives from the base Config class and overrides some values.
     """
     # Give the configuration a recognizable name
-    NAME = "blueprint"
+    NAME = "Blueprint"
 
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
