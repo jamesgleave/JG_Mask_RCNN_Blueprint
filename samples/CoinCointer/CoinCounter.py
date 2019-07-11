@@ -77,6 +77,7 @@ class CoinDataset(utils.Dataset):
         dataset_dir: Root directory of the dataset.
         subset: Subset to load: train or val
         """
+
         # Add classes. We have 6 classes to add.
         self.add_class("Coin", 1, "penny")
         self.add_class("Coin", 2, "nickel")
@@ -84,8 +85,6 @@ class CoinDataset(utils.Dataset):
         self.add_class("Coin", 4, "quarter")
         self.add_class("Coin", 5, "loonie")
         self.add_class("Coin", 6, "toonie")
-
-
 
         # Train or validation dataset?
         assert subset in ["train", "val"]
@@ -184,7 +183,7 @@ class CoinDataset(utils.Dataset):
             # Get indexes of pixels inside the polygon and set them to 1
 
             rr, cc = self.check_shape_of_annotation(p)
-            if self.debugPolygons(p, rr, cc, i, mask, info):
+            if self.debug_polygons(p, rr, cc, i, mask, info):
                 mask[rr, cc, i] = 1
 
         # *************************************************************** #
@@ -196,9 +195,8 @@ class CoinDataset(utils.Dataset):
         return mask.astype(np.bool), np.array(image_info['coinVariant'])
 
     # If there is an issue of with one or more photos in a dataset, this will ensure it does not crash the program
-    def debugPolygons(self, p, rr, cc, i, mask, info):
+    def debug_polygons(self, p, rr, cc, i, mask, info):
         try:
-
             mask[rr, cc]
             return True
         except:
@@ -256,6 +254,10 @@ class CoinDataset(utils.Dataset):
                 total_value += 2
 
         return total_value
+
+    def get_class_names(self):
+
+        return self.class_names
 
 
 def train(model):
@@ -383,7 +385,7 @@ IMAGE_DIR = os.path.join(ROOT_DIR, "datasets/coin/val")
 
 # My Class names
 ds = CoinDataset()
-class_names = ds.class_names()
+class_names = ds.get_class_names()
 
 # Load a random image from the images folder
 # file_names = next(os.walk(IMAGE_DIR))[2]
@@ -470,7 +472,7 @@ if __name__ == '__main__':
                                   model_dir=args.logs)
 
     if args.command == "inference":
-        inference(model=model, path=args.image)
+        inference(model_inf=model, path=args.image)
 
     # Select weights file to load
     if args.weights.lower() == "coco":
