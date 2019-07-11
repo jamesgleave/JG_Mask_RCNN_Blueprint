@@ -64,11 +64,10 @@ class CoinConfig(Config):
     LEARNING_MOMENTUM = 0.9
 
 
-
-
 ############################################################
 #  Data-set
 ############################################################
+
 
 class CoinDataset(utils.Dataset):
 
@@ -127,19 +126,19 @@ class CoinDataset(utils.Dataset):
             coin_variant = []
             region_annotations = a['regions']
             for i in range(len(region_annotations)):
-                coinCode = region_annotations[i]['region_attributes']['Coin']
+                coin_code = region_annotations[i]['region_attributes']['Coin']
 
-                if coinCode == "Toonie":
+                if coin_code == "Toonie":
                     coin_variant.append(6)
-                elif coinCode == "Loonie":
+                elif coin_code == "Loonie":
                     coin_variant.append(5)
-                elif coinCode == "Quarter":
+                elif coin_code == "Quarter":
                     coin_variant.append(4)
-                elif coinCode == "Dime":
+                elif coin_code == "Dime":
                     coin_variant.append(3)
-                elif coinCode == "Nickel":
+                elif coin_code == "Nickel":
                     coin_variant.append(2)
-                elif coinCode == "Penny":
+                elif coin_code == "Penny":
                     coin_variant.append(1)
 
             # load_mask() needs the image size to convert polygons to masks.
@@ -256,8 +255,11 @@ class CoinDataset(utils.Dataset):
         return total_value
 
     def get_class_names(self):
+        class_name_list = []
+        for name in self.class_info["name"]:
+            class_name_list.append(name)
 
-        return self.class_names
+        return class_name_list
 
 
 def train(model):
