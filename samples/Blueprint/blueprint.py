@@ -6,6 +6,7 @@ import numpy as np
 import skimage.draw
 import skimage.color
 import skimage.io
+import glob
 import skimage.transform as skit
 
 # Root directory of the project
@@ -14,6 +15,7 @@ ROOT_DIR = os.path.abspath("../../")
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)  # To find local version of the library
 from mrcnn.config import Config
+from mrcnn import visualize
 from mrcnn import model as modellib, utils
 
 # Path to trained weights file
@@ -223,6 +225,26 @@ class BlueprintDataset(utils.Dataset):
 
         return rr, cc
 
+    def get_class_names(self):
+        class_name_list = []
+        print("Classes:")
+        for obj in self.class_info:
+            print("- ", obj["name"])
+            name = obj["name"]
+            class_name_list.append(name)
+
+        return class_name_list
+
+    def load_inference_classes(self):
+        # This loads in the classes for inference only
+        # Copy your class names here.
+
+        # self.add_class("Source", 1, "name")
+        # self.add_class("Source", 2, "name")
+        # self.add_class("Source", 3, "name")
+        # etc...
+        return
+
 
 def train(model):
     """Train the model."""
@@ -327,6 +349,69 @@ def detect_and_color_splash(model, image_path=None, video_path=None):
 
 
 ############################################################
+#  Inference
+############################################################
+
+
+# Import my config
+sys.path.append(os.path.join(ROOT_DIR, "samples/Blueprint/"))  # To find local version
+
+# Directory to save logs and trained model
+MODEL_DIR = os.path.join(ROOT_DIR, "logs")
+
+# Local path to trained weights file
+CoinCounter_MODEL_PATH = os.path.join(ROOT_DIR, "path/to/your/model")
+
+# Directory of images to run detection on
+IMAGE_DIR = os.path.join(ROOT_DIR, "path/to/your/dataset")
+
+
+# Load a random image from the images folder
+def define_path(file_path, model_inf, class_names):
+    if os.path.isdir(file_path):
+        inference_dir(file_path, model_inf, class_names)
+    else:
+        inference_image(file_path, model_inf, class_names)
+
+
+# If an image is sent for inference this function is used.
+# It reads a single image.
+def inference_image(file_path, model_inf, class_names):
+    im = skimage.io.imread(file_path)
+    results = model_inf.detect([im], verbose=1)
+    r = results[0]
+    visualize.display_instances(im, r['rois'], r['masks'], r['class_ids'],
+                                class_names, r['scores'], figsize=(8, 8))
+
+
+def inference_dir(file_path, model_inf, class_names):
+    im_list = []
+    r_list = []
+    for path in glob.iglob(pathname=file_path + "/*.jpg"):
+        im = skimage.io.imread(path)
+        im_list.append(im)
+
+        results = model_inf.detect([im], verbose=1)
+        r_list.append(results[0])
+
+    i = 0
+    for r in r_list:
+        visualize.display_instances(im_list[i], r['rois'], r['masks'], r['class_ids'],
+                                    class_names, r['scores'], figsize=(8, 8))
+        i += 1
+
+
+def inference(path, model_inf):
+
+    # My Class names
+    inference_dataset = BlueprintDataset()
+    inference_dataset.load_inference_classes()
+    class_names = inference_dataset.get_class_names()
+
+    define_path(path, model_inf, class_names)
+
+
+############################################################
 #  Training
 ############################################################
 
@@ -339,7 +424,7 @@ if __name__ == '__main__':
         description='Train Mask R-CNN to detect blueprints.')
     parser.add_argument("command",
                         metavar="<command>",
-                        help="'train' or 'splash'")
+                        help="'train' or 'splash' or 'inference'")
     parser.add_argument('--dataset', required=False,
                         metavar="/path/to/YOUR/dataset/",
                         help='Directory of the YOUR dataset')
@@ -364,6 +449,9 @@ if __name__ == '__main__':
     elif args.command == "splash":
         assert args.image or args.video,\
                "Provide --image or --video to apply color splash"
+    elif args.command == "inference":
+        assert args.image,\
+               "Provide --image=(image path) or (directory path)"
 
     print("Weights: ", args.weights)
     print("Dataset: ", args.dataset)
@@ -421,6 +509,8 @@ if __name__ == '__main__':
     elif args.command == "splash":
         detect_and_color_splash(model, image_path=args.image,
                                 video_path=args.video)
+    elif args.command == "inference":
+        inference(model_inf=model, path=args.image)
     else:
         print("'{}' is not recognized. "
               "Use 'train' or 'splash'".format(args.command))

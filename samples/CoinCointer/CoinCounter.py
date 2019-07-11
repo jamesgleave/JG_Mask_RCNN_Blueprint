@@ -34,7 +34,8 @@ DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 
 # *********************************************************************************************************** #
 #                                 HOW TO TRAIN THE MODEL WITH COCO WEIGHTS                                    #
-#             python3 samples/CoinCointer/CoinCounter.py train --dataset=datasets/coin/ --weights=coco
+#               python3 samples/CoinCointer/CoinCounter.py train --dataset=datasets/coin/
+#                               --weights=coco --logs=logs/CoinCounterLogs
 # *********************************************************************************************************** #
 
 # *********************************************************************************************************** #
@@ -65,17 +66,17 @@ class CoinConfig(Config):
     NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
 
     # Number of training steps per epoch
-    STEPS_PER_EPOCH = 40
+    STEPS_PER_EPOCH = 100
 
-    LEARNING_RATE = 0.0007
+    LEARNING_RATE = 0.0009
     LEARNING_MOMENTUM = 0.9
 
-    DETECTION_MIN_CONFIDENCE = 0.5
+    DETECTION_MIN_CONFIDENCE = 0.7
 
 
 def get_available_devices():
     local_device_protos = device_lib.list_local_devices()
-    return [x.name for x in local_device_protos if x.device_type == 'GPU']
+    return [x.name for x in local_device_protos]
 
 
 print("The available devices are", get_available_devices())
