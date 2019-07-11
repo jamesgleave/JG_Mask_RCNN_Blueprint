@@ -57,8 +57,10 @@ class CoinConfig(Config):
     # Number of training steps per epoch
     STEPS_PER_EPOCH = 40
 
-    # Skip detections with < 90% confidence
-    DETECTION_MIN_CONFIDENCE = 0.9
+    LEARNING_RATE = 0.0007
+    LEARNING_MOMENTUM = 0.9
+
+
 
 
 ############################################################
