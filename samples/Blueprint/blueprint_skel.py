@@ -74,47 +74,18 @@ class BlueprintDataset(utils.Dataset):
         """Load a subset of the blueprint dataset.
         dataset_dir: Root directory of the dataset.
         subset: Subset to load: train or val
-        """
+
 
         # Add classes. Include all classes you want to detect.
         self.add_class("Source", "ID (this should be an int)", "Name")
 
-        # Training or validation dataset?
-        assert subset in ["train", "val"]
-        dataset_dir = os.path.join(dataset_dir, subset)
-
-        # This is the annotation used to outline an instance.
-        annotations = json.load(open(os.path.join(dataset_dir, "via_region_data.json")))
-        annotations = list(annotations.values())  # don't need the dict keys
-
-        # The VIA tool saves images in the JSON even if they don't have any
-        # annotations. Skip unannotated images.
-        annotations = [a for a in annotations if a['regions']]
-
-        # Add images
-        for a in annotations:
-            # Get the x, y coordinates of points of the polygons that make up
-            # the outline of each object instance. These are stores in the
-            # shape_attributes. The if condition is needed to support VIA versions 1.x and 2.x.
-
-            if type(a['regions']) is dict:
-                polygons = [r['shape_attributes'] for r in a['regions'].values()]
-            else:
-                polygons = [r['shape_attributes'] for r in a['regions']]
-
-            # load_mask() needs the image size to convert polygons to masks.
-            # Unfortunately, VIA doesn't include it in JSON, so we must read
-            # the image. This is only manageable since the data set is tiny.
-            image_path = os.path.join(dataset_dir, a['filename'])
-            image = skimage.io.imread(image_path)
-
-            height, width = image.shape[:2]
-            self.add_image(
-                "Source",
-                image_id=a['filename'],  # use file name as a unique image id
-                path=image_path,
-                width=width, height=height,
-                polygons=polygons)
+        self.add_image(
+            "Source",
+            image_id=a['filename'],  # use file name as a unique image id
+            path=image_path,
+            width=width, height=height,
+            polygons=polygons)
+        """
 
     def load_mask(self, image_id):
         """Generate instance masks for an image.
@@ -124,50 +95,13 @@ class BlueprintDataset(utils.Dataset):
         class_ids: a 1D array of class IDs of the instance masks.
         """
 
-        # If not a part of your dataset image, delegate to parent class.
-        image_info = self.image_info[image_id]
-        if image_info["source"] != "Source":
-            return super(self.__class__, self).load_mask(image_id)
+    def debug_polygons(self, p, rr, cc, i, mask, info):
+        """ If there is an issue of with one or more photos in a dataset,
+        this will ensure it does not crash the program"""
 
-        # Convert polygons to a bitmap mask of shape
-        info = self.image_info[image_id]
-        mask = np.zeros([info["height"], info["width"], len(info["polygons"])],
-                        dtype=np.uint8)
-
-        for i, p in enumerate(info["polygons"]):
-            # Get indexes of pixels inside the polygon and set them to 1
-
-            rr, cc = self.check_shape_of_annotation(p)  # Checks to see which shape was used and returns rr, cc
-            if self.debugPolygons(p, rr, cc, i, mask, info):  # Checks for issues with an image
-                mask[rr, cc, i] = 1
-
-        # Return mask, and array of class IDs of each instance.
-        return mask.astype(np.bool), "number of instances"
-
-    # If there is an issue of with one or more photos in a dataset, this will ensure it does not crash the program
-    def debugPolygons(self, p, rr, cc, i, mask, info):
-        try:
-
-            mask[rr, cc]
-            return True
-        except:
-            if i == 0:
-                print("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-                      "\n!!!!!!ERROR!!ERROR!!ERROR!!ERROR!!ERROR!!!!!!"
-                      "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                print("The mask length was", len(mask))
-                print("The iteration was:", i)
-                print("The length of rr was:", len(rr), "and the length of cc was:", len(cc))
-                print("The image info was:", info)
-            return False
 
     def image_reference(self, image_id):
         """Return the path of the image."""
-        info = self.image_info[image_id]
-        if info["source"] == "Source":
-            return info["path"]
-        else:
-            super(self.__class__, self).image_reference(image_id)
 
     # Checks which polygon was used in tagging the photo and returns the appropriate points
     def check_shape_of_annotation(self, p=None):
@@ -185,9 +119,22 @@ class BlueprintDataset(utils.Dataset):
 
         return rr, cc
 
+    def get_class_names(self):
+        """Returns a list of the names of the classes were created for detection"""
+
+    def load_inference_classes(self):
+        # This loads in the classes for inference only
+        # Copy your class names here.
+
+        # self.add_class("Source", 1, "name")
+        # self.add_class("Source", 2, "name")
+        # self.add_class("Source", 3, "name")
+        # etc...
+        return
+
 
 def train(model):
-    """Train the model."""
+    """Train the model.
     # Training dataset.
     dataset_train = BlueprintDataset()
     dataset_train.load_blueprint(args.dataset, "train")
@@ -213,7 +160,7 @@ def train(model):
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE / 10,
                 epochs=2,
-                layers="all")
+                layers="all") """
 
 
 def color_splash(image, mask):
@@ -223,75 +170,43 @@ def color_splash(image, mask):
 
     Returns result image.
     """
-    # Make a grayscale copy of the image. The grayscale copy still
-    # has 3 RGB channels, though.
-    gray = skimage.color.gray2rgb(skimage.color.rgb2gray(image)) * 255
-    # Copy color pixels from the original color image where mask is set
-    if mask.shape[-1] > 0:
-        # We're treating all instances as one, so collapse the mask into one layer
-        mask = (np.sum(mask, -1, keepdims=True) >= 1)
-        splash = np.where(mask, image, gray).astype(np.uint8)
-    else:
-        splash = gray.astype(np.uint8)
-    return splash
 
 
 def detect_and_color_splash(model, image_path=None, video_path=None):
-    assert image_path or video_path
+    """Applies colour splash and detects objects in a video or image"""
 
-    # Image or video?
-    if image_path:
-        # Run model detection and generate the color splash effect
-        print("Running on {}".format(args.image))
-        # Read image
-        image = skimage.io.imread(args.image)
-        # Detect objects
-        r = model.detect([image], verbose=1)[0]
-        # Color splash
-        splash = color_splash(image, r['masks'])
-        # Save output
-        file_name = "splash_{:%Y%m%dT%H%M%S}.png".format(datetime.datetime.now())
-        skimage.io.imsave(file_name, splash)
-    elif video_path:
-        import cv2
-        # Video capture
-        vcapture = cv2.VideoCapture(video_path)
-        width = int(vcapture.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(vcapture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fps = vcapture.get(cv2.CAP_PROP_FPS)
+############################################################
+#  Inference
+############################################################
 
-        # Define codec and create video writer
-        file_name = "splash_{:%Y%m%dT%H%M%S}.avi".format(datetime.datetime.now())
-        vwriter = cv2.VideoWriter(file_name,
-                                  cv2.VideoWriter_fourcc(*'MJPG'),
-                                  fps, (width, height))
 
-        count = 0
-        success = True
-        while success:
-            print("frame: ", count)
-            # Read next image
-            success, image = vcapture.read()
-            if success:
-                # OpenCV returns images as BGR, convert to RGB
-                image = image[..., ::-1]
-                # Detect objects
-                r = model.detect([image], verbose=0)[0]
-                # Color splash
-                splash = color_splash(image, r['masks'])
-                # RGB -> BGR to save image to video
-                splash = splash[..., ::-1]
-                # Add image to video writer
-                vwriter.write(splash)
-                count += 1
-        vwriter.release()
-    print("Saved to ", file_name)
+# Load a random image from the images folder
+def define_path(file_path, model_inf, class_names):
+    if os.path.isdir(file_path):
+        inference_dir(file_path, model_inf, class_names)
+    else:
+        inference_image(file_path, model_inf, class_names)
+
+
+
+def inference_image(file_path, model_inf, class_names):
+    """
+    If an image is sent for inference this function is used.
+    It reads a single image."""
+
+
+def inference_dir(file_path, model_inf, class_names):
+    """If a directory's path is sent for inference, this function will be called.
+        It will preform inference on every image inside the given directory."""
+
+
+def inference(path, model_inf):
+    """"""
 
 
 ############################################################
 #  Training
 ############################################################
-
 
 if __name__ == '__main__':
     import argparse
