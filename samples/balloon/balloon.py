@@ -45,6 +45,8 @@ ROOT_DIR = os.path.abspath("../../")
 sys.path.append(ROOT_DIR)  # To find local version of the library
 from mrcnn.config import Config
 from mrcnn import model as modellib, utils
+from skimage import color
+from PIL import Image
 
 # Path to trained weights file
 COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
@@ -223,6 +225,34 @@ def color_splash(image, mask):
     return splash
 
 
+def remove_background(image, mask):
+    """Blacks out all objects that are not balloons.
+    image: RGB image [height, width, 3]
+    mask: instance segmentation mask [height, width, instance count]
+
+    Returns result image.
+    """
+    # Make a blacked out copy of the image. The blacked out copy still
+    # has 3 RGB channels, though.
+    blackout = skimage.color.gray2rgb(skimage.color.rgb2gray(image)) * 0
+    transparent_image = create_transparent_image(image)
+    # Copy color pixels from the original color image where mask is set
+    if mask.shape[-1] > 0:
+        # We're treating all instances as one, so collapse the mask into one layer
+        mask = (np.sum(mask, -1, keepdims=True) >= 1)
+        splash = np.where(mask, image, blackout).astype(np.uint8)
+    else:
+        splash = blackout.astype(np.uint8)
+
+    return splash
+
+
+def create_transparent_image(mask):
+    image_dimensions = (len(mask[0]), len(mask[1]))
+    transparent_image = Image.new("RGBA", image_dimensions)
+    return transparent_image
+
+
 def detect_and_color_splash(model, image_path=None, video_path=None):
     assert image_path or video_path
 
@@ -234,8 +264,10 @@ def detect_and_color_splash(model, image_path=None, video_path=None):
         image = skimage.io.imread(args.image)
         # Detect objects
         r = model.detect([image], verbose=1)[0]
+
         # Color splash
-        splash = color_splash(image, r['masks'])
+        # splash = color_splash(image, r['masks'])
+        splash = remove_background(image, r['masks'])
         # Save output
         file_name = "splash_{:%Y%m%dT%H%M%S}.png".format(datetime.datetime.now())
         skimage.io.imsave(file_name, splash)
