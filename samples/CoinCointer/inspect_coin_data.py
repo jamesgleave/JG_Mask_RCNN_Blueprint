@@ -97,6 +97,8 @@ def display_dataset(num_of_random_samples):
     visualize.display_instances(image, bbox, mask, class_ids, dataset.class_names)
 
 
+display_dataset(3)
+
 if __name__ == '__main__':
     import argparse
 
