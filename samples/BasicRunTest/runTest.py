@@ -103,4 +103,4 @@ def defineImage(filePath):
                                     class_names, r['scores'])
 
 # Enter the path of an image here.
-defineImage("Path/To/Image/")
+defineImage("images/12283150_12d37e6389_z.jpg")

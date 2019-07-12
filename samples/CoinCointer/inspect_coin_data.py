@@ -66,26 +66,56 @@ for i, info in enumerate(dataset.class_info):
 # **************************************************************************** #
 
 
-# Load and display random samples
-image_ids = np.random.choice(dataset.image_ids, 5)
-for image_id in image_ids:
+def display_dataset(num_of_random_samples):
+    # Load and display random samples
+    if num_of_random_samples >= len(dataset.image_ids):
+        print("The number of samples cannot be larger than the amount of samples available")
+        print("\nSetting the amount of equal to the amount of samples")
+        num_of_random_samples = len(dataset.image_ids) - 1
+
+    image_ids = np.random.choice(dataset.image_ids, num_of_random_samples)
+
+    for image_id in image_ids:
+        image = dataset.load_image(image_id)
+        mask, class_ids = dataset.load_mask(image_id)
+        visualize.display_top_masks(image, mask, class_ids, dataset.class_names)
+
+    # Load random image and mask.
+    image_id = random.choice(dataset.image_ids)
     image = dataset.load_image(image_id)
     mask, class_ids = dataset.load_mask(image_id)
-    visualize.display_top_masks(image, mask, class_ids, dataset.class_names)
+    # Compute Bounding box
+    bbox = utils.extract_bboxes(mask)
+
+    # Display image and additional stats
+    print("image_id ", image_id, dataset.image_reference(image_id))
+    log("image", image)
+    log("mask", mask)
+    log("class_ids", class_ids)
+    log("bbox", bbox)
+    # Display image and instances
+    visualize.display_instances(image, bbox, mask, class_ids, dataset.class_names)
 
 
-# Load random image and mask.
-image_id = random.choice(dataset.image_ids)
-image = dataset.load_image(image_id)
-mask, class_ids = dataset.load_mask(image_id)
-# Compute Bounding box
-bbox = utils.extract_bboxes(mask)
+if __name__ == '__main__':
+    import argparse
 
-# Display image and additional stats
-print("image_id ", image_id, dataset.image_reference(image_id))
-log("image", image)
-log("mask", mask)
-log("class_ids", class_ids)
-log("bbox", bbox)
-# Display image and instances
-visualize.display_instances(image, bbox, mask, class_ids, dataset.class_names)
+    parser = argparse.ArgumentParser(
+        description='Inspecting Data...')
+    parser.add_argument("command",
+                        metavar="<command>",
+                        help="'inspect'")
+    parser.add_argument('nsi', required=True,
+                        metavar="N", type=int,
+                        help='Number of samples to inspect (int)')
+    args = parser.parse_args()
+
+    # Validate arguments
+    if args.command == "inspect":
+        assert args.dataset, "Argument --nsi (number of samples to inspect) is required for inspecting data"
+
+    print("Dataset: ", args.dataset)
+
+    # Configurations
+    if args.command == "inspect":
+        display_dataset(args.nsi)
