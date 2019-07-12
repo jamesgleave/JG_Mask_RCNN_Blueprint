@@ -235,7 +235,25 @@ def remove_background(image, mask):
     # Make a blacked out copy of the image. The blacked out copy still
     # has 3 RGB channels, though.
     blackout = skimage.color.gray2rgb(skimage.color.rgb2gray(image)) * 0
-    transparent_image = create_transparent_image(image)
+
+    transparent_image = create_transparent_image(mask)
+    transparent_image.save("y.png")
+
+    blackout = np.array(blackout)
+    transparent_image = np.array(transparent_image)
+    image = np.array(image)
+
+    print(type(transparent_image))
+    print(type(image))
+    print(type(blackout))
+    print(type(mask))
+
+    print("image:", image.shape)
+    print("image reshaped", image.reshape((image.shape[0], image.shape[1], )))
+    print("mask:", mask.shape)
+    print("b/o", blackout.shape)
+    print(len(transparent_image))
+
     # Copy color pixels from the original color image where mask is set
     if mask.shape[-1] > 0:
         # We're treating all instances as one, so collapse the mask into one layer
@@ -267,7 +285,7 @@ def detect_and_color_splash(model, image_path=None, video_path=None):
 
         # Color splash
         # splash = color_splash(image, r['masks'])
-        splash = remove_background(image, r['masks'])
+        splash = color_splash(image, r['masks'])
         # Save output
         file_name = "splash_{:%Y%m%dT%H%M%S}.png".format(datetime.datetime.now())
         skimage.io.imsave(file_name, splash)
