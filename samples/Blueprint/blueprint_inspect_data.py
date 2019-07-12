@@ -84,9 +84,24 @@ def display_dataset(num_of_random_samples):
 if __name__ == '__main__':
     import argparse
 
-    # Parse command line arguments
     parser = argparse.ArgumentParser(
         description='Inspecting Data...')
-    parser.add_argument('nrs', required=True,
+    parser.add_argument("command",
+                        metavar="<command>",
+                        help="'inspect'")
+    parser.add_argument('nsi', required=True,
                         metavar="N", type=int,
                         help='Number of samples to inspect (int)')
+    args = parser.parse_args()
+
+    # Validate arguments
+    if args.command == "inspect":
+        assert args.dataset, "Argument --nsi (number of samples to inspect) is required for inspecting data"
+
+    print("Dataset: ", args.dataset)
+
+    # Configurations
+    if args.command == "train":
+        display_dataset(args.nsi)
+
+

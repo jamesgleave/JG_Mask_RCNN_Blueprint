@@ -173,7 +173,7 @@ class BlueprintDataset(utils.Dataset):
             # Get indexes of pixels inside the polygon and set them to 1
 
             rr, cc = self.check_shape_of_annotation(p)
-            if self.debugPolygons(p, rr, cc, i, mask, info):
+            if self.debug_polygons(p, rr, cc, i, mask, info):
                 mask[rr, cc, i] = 1
 
         # *************************************************************** #
@@ -184,10 +184,11 @@ class BlueprintDataset(utils.Dataset):
         # possible instances, so we give the class ID's the list of blueprint variants in each image
         return mask.astype(np.bool), np.array(image_info['blueprintVariant'])
 
-    # If there is an issue of with one or more photos in a dataset, this will ensure it does not crash the program
-    def debugPolygons(self, p, rr, cc, i, mask, info):
-        try:
+    def debug_polygons(self, p, rr, cc, i, mask, info):
+        """ If there is an issue of with one or more photos in a dataset,
+        this will ensure it does not crash the program"""
 
+        try:
             mask[rr, cc]
             return True
         except:
@@ -209,8 +210,8 @@ class BlueprintDataset(utils.Dataset):
         else:
             super(self.__class__, self).image_reference(image_id)
 
-    # Checks which polygon was used in tagging the photo and returns the appropriate points
     def check_shape_of_annotation(self, p=None):
+        """Checks which polygon was used in tagging the photo and returns the appropriate points"""
         if p['name'] == 'polygon':
             rr, cc = skimage.draw.polygon(p['all_points_y'], p['all_points_x'])
         if p['name'] == 'polyline':
@@ -223,6 +224,8 @@ class BlueprintDataset(utils.Dataset):
         return rr, cc
 
     def get_class_names(self):
+        """Returns a list of classes that were previously defined"""
+
         class_name_list = []
         print("Classes:")
         for obj in self.class_info:
@@ -233,8 +236,8 @@ class BlueprintDataset(utils.Dataset):
         return class_name_list
 
     def load_inference_classes(self):
-        # This loads in the classes for inference only
-        # Copy your class names here.
+        """This loads in the classes for inference only.
+        Copy your class names here."""
 
         # self.add_class("Source", 1, "name")
         # self.add_class("Source", 2, "name")
@@ -339,20 +342,6 @@ def detect_and_color_splash(model, image_path=None, video_path=None):
 #  Inference
 ############################################################
 
-
-# Import my config
-sys.path.append(os.path.join(ROOT_DIR, "samples/Blueprint/"))  # To find local version
-
-# Directory to save logs and trained model
-MODEL_DIR = os.path.join(ROOT_DIR, "logs")
-
-# Local path to trained weights file
-CoinCounter_MODEL_PATH = os.path.join(ROOT_DIR, "path/to/your/model")
-
-# Directory of images to run detection on
-IMAGE_DIR = os.path.join(ROOT_DIR, "path/to/your/dataset")
-
-
 # Load a random image from the images folder
 def define_path(file_path, model_inf, class_names):
     if os.path.isdir(file_path):
@@ -389,8 +378,9 @@ def inference_dir(file_path, model_inf, class_names):
 
 
 def inference(path, model_inf):
-
-    # My Class names
+    """Begins the inference process. First, the class names are loaded,
+    then the specified path is checked to see if it is a directory or an
+    image file."""
     inference_dataset = BlueprintDataset()
     inference_dataset.load_inference_classes()
     class_names = inference_dataset.get_class_names()
