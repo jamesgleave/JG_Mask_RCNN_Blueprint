@@ -21,10 +21,6 @@ from mrcnn import model as modellib, utils
 # Path to trained weights file
 COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 
-# Path to hyperparameters.yaml file
-HYPERPARAMETERS = os.path.join(ROOT_DIR, "samples/Blueprint/hyperparameters.yaml")
-
-
 # Directory to save logs and model checkpoints, if not provided
 # through the command line argument --logs
 DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
@@ -84,6 +80,7 @@ class BlueprintConfig(Config):
 #  Data-set
 ############################################################
 
+
 class BlueprintDataset(utils.Dataset):
 
     def load_blueprint(self, dataset_dir, subset):
@@ -135,10 +132,6 @@ class BlueprintDataset(utils.Dataset):
                 polygons = [r['shape_attributes'] for r in a['regions'].values()]
             else:
                 polygons = [r['shape_attributes'] for r in a['regions']]
-
-            # ****************************************************************** #
-            #  IMPLEMENT A METHOD THAT ALLOWS YOU TO ADD COMPONENTS TO AN IMAGE
-            # ****************************************************************** #
 
             # load_mask() needs the image size to convert polygons to masks.
             # Unfortunately, VIA doesn't include it in JSON, so we must read
@@ -266,18 +259,8 @@ def train(model):
     print("Training network heads")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
-                epochs=30,
+                epochs=10,
                 layers='heads')
-
-    # Fine tune all layers
-    # Passing layers="all" trains all layers. You can also
-    # pass a regular expression to select which layers to
-    # train by name pattern.
-    print("Training all network nodes")
-    model.train(dataset_train, dataset_val,
-                learning_rate=config.LEARNING_RATE / 10,
-                epochs=2,
-                layers="all")
 
 
 def color_splash(image, mask):
