@@ -7,7 +7,7 @@ This is an implementation to matterport's [Mask_RCNN repository](https://github.
 The repository contains: 
   - All files contained in the [parent repository](https://github.com/matterport/Mask_RCNN)
   - An added "CoinCounter" class, which counts the total value of coins in a photo
-  - A "Blueprint" directory, which contains a blackbox blueprint_class, a blackbox blueprint_inspect_model and a blackbox           blueprint_inspect_data .py file.
+  - A "Blueprint" directory, which contains a blackbox blueprint_class and a blackbox blueprint_inspect_data .py file.
  
 # About the blueprint
 
@@ -19,7 +19,7 @@ The goal of this repository is to create system for generalized and easily confi
 
 -1. Download [the COCO weights](https://www.dropbox.com/s/acoxck93wmuq151/mask_rcnn_coco.h5?dl=0). You can optionally download the [coin and balloon dataset](https://www.dropbox.com/sh/5ywnb1788fhlrps/AAAoj0S2gjoKf6am077DQ_UAa?dl=0) as well. Place the coco weights in your repository and create a directory called "datasets" for the datasets.
 
--2. You should create a "logs" file to save training progress (weights after every epoch and scalers for tensorboard). 
+-2. Create a "logs" file to save training progress (weights after every epoch and scalers for tensorboard). 
 
 -3. Install all of the dependencies > pip3 install -r requirements
 
