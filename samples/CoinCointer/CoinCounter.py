@@ -46,7 +46,7 @@ DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 
 # *********************************************************************************************************** #
 #                                      HOW TO RUN INFERENCE ON A TRAINED MODEL                                #
-#                 python3 samples/CoinCointer/CoinCounter.py inference --image=datasets/coin/val
+# python3 samples/CoinCointer/CoinCounter.py inference --image=datasets/coin/val --weights=mask_rcnn_coin_0030.h5
 # *********************************************************************************************************** #
 
 
