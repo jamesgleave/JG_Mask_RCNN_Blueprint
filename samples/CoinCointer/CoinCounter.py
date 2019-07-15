@@ -16,10 +16,23 @@ print("Root dir:", ROOT_DIR)
 
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)  # To find local version of the library
-from mrcnn.config import Config
-from mrcnn import model as modellib, utils
-from mrcnn import visualize
+print("Found local version of the library\n")
+
+print("Importing...\n")
+print("Importing tensorflow client...")
 from tensorflow.python.client import device_lib
+print("Successfully imported tensorflow client...")
+print("Importing mrcnn config")
+from mrcnn.config import Config
+print("Successfully imported mrcnn config...")
+print("Importing mrcnn model")
+from mrcnn import model as modellib, utils
+print("Successfully imported mrcnn model...")
+print("Importing mrcnn visualize")
+from mrcnn import visualize
+print("Successfully imported mrcnn visualize...")
+
+
 
 # Path to trained weights file
 COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
@@ -37,8 +50,7 @@ print("default log path:", DEFAULT_LOGS_DIR)
 
 # *********************************************************************************************************** #
 #                                 HOW TO TRAIN THE MODEL WITH COCO WEIGHTS                                    #
-#               python3 samples/CoinCointer/CoinCounter.py train --dataset=datasets/coin/
-#                               --weights=coco --logs=logs/CoinCounterLogs
+# python3 samples/CoinCointer/CoinCounter.py train --dataset=datasets/coin/ --weights=coco --logs=logs/CoinCounterLogs
 # *********************************************************************************************************** #
 # /groups/hachgrp/projects/dev-image-segmentation/scripts/JG_Mask_RCNN_Blueprint/samples/CoinCointer/CoinCounter.py train --dataset=/groups/hachgrp/projects/dev-image-segmentation/scripts/JG_Mask_RCNN_Blueprint/datasets/coin/ --weights=coco --logs=/groups/hachgrp/projects/dev-image-segmentation/scripts/JG_Mask_RCNN_Blueprint/logs/CoinCounterLogs
 # # *********************************************************************************************************** #
