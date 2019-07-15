@@ -9,6 +9,8 @@ import skimage.io
 import skimage.transform as skit
 import glob
 
+print("OS.name:", os.name)
+
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../../")
 print("Root dir:", ROOT_DIR)
