@@ -12,6 +12,7 @@ import glob
 
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../../")
+print("Root dir:", ROOT_DIR)
 
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)  # To find local version of the library
@@ -22,10 +23,12 @@ from tensorflow.python.client import device_lib
 
 # Path to trained weights file
 COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
+print("the coco weights:", COCO_WEIGHTS_PATH)
 
 # Directory to save logs and model checkpoints, if not provided
 # through the command line argument --logs
 DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
+print("default log path:", DEFAULT_LOGS_DIR)
 
 ############################################################
 #  Configurations
@@ -37,6 +40,8 @@ DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 #               python3 samples/CoinCointer/CoinCounter.py train --dataset=datasets/coin/
 #                               --weights=coco --logs=logs/CoinCounterLogs
 # *********************************************************************************************************** #
+# /groups/hachgrp/projects/dev-image-segmentation/scripts/JG_Mask_RCNN_Blueprint/samples/CoinCointer/CoinCounter.py train --dataset=/groups/hachgrp/projects/dev-image-segmentation/scripts/JG_Mask_RCNN_Blueprint/datasets/coin/ --weights=coco --logs=/groups/hachgrp/projects/dev-image-segmentation/scripts/JG_Mask_RCNN_Blueprint/logs/CoinCounterLogs
+# # *********************************************************************************************************** #
 
 # *********************************************************************************************************** #
 #                                      HOW TO CONTINUE TRAINING THE MODEL                                     #
@@ -291,6 +296,29 @@ class CoinDataset(utils.Dataset):
         self.add_class("Coin", 4, "quarter")
         self.add_class("Coin", 5, "loonie")
         self.add_class("Coin", 6, "toonie")
+
+
+def optimize_hyperparameters(num_of_cylces=5, method="grid_search"):
+    """Runs a specified amount of iterations to fine-tune the hyperparameters
+    1. create model -
+        config = coinConfig()
+        model = modellib.MaskRCNN(mode="training", config=config,
+                                  model_dir=args.logs)
+
+    2. read the method (default is grid search)
+            if method == 'grid_search":
+                do something
+            elif method == random_search:
+                do something else
+            else:
+                throw error (user entered something incorrect
+
+    3. run the default config
+
+    4. Find the loss after n steps and m epochs (benchmark)
+
+    5.
+    """
 
 
 def train(model):
