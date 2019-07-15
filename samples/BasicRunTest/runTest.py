@@ -103,4 +103,4 @@ def defineImage(filePath):
                                     class_names, r['scores'])
 
 # Enter the path of an image here.
-defineImage("Path/To/Image/")
+defineImage("JG_Mask_RCNN_Blueprint/datasets/people/val/IMG_2824.jpg")
