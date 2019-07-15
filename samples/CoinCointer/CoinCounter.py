@@ -33,7 +33,6 @@ from mrcnn import visualize
 print("Successfully imported mrcnn visualize...")
 
 
-
 # Path to trained weights file
 COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 print("the coco weights:", COCO_WEIGHTS_PATH)
@@ -575,7 +574,7 @@ if __name__ == '__main__':
         weights_path = COCO_WEIGHTS_PATH
         # Download weights file
         if not os.path.exists(weights_path):
-            utils.download_trained_weights(weights_path)
+            utils.download_trained_weights(weights_path+"/raw-data")
     elif args.weights.lower() == "last":
         # Find last trained weights
         weights_path = model.find_last()
