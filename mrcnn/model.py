@@ -8,6 +8,11 @@ Written by Waleed Abdulla
 """
 
 import os
+os.environ['MKL_NUM_THREADS'] = '16'
+os.environ['GOTO_NUM_THREADS'] = '16'
+os.environ['OMP_NUM_THREADS'] = '16'
+os.environ['openmp'] = 'True'
+
 import random
 import datetime
 import re

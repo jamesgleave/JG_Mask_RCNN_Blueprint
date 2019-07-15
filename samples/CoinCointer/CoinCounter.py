@@ -9,11 +9,6 @@ import skimage.io
 import skimage.transform as skit
 import glob
 
-# os.environ['MKL_NUM_THREADS'] = '16'
-# os.environ['GOTO_NUM_THREADS'] = '16'
-# os.environ['OMP_NUM_THREADS'] = '16'
-# os.environ['openmp'] = 'True'
-
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../../")
 print("Root dir:", ROOT_DIR)
@@ -81,8 +76,6 @@ class CoinConfig(Config):
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
     IMAGES_PER_GPU = 1
-
-
 
     # Number of classes (including background)
     NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
