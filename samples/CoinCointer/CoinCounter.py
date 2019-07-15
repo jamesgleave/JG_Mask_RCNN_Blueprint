@@ -9,10 +9,10 @@ import skimage.io
 import skimage.transform as skit
 import glob
 
-os.environ['MKL_NUM_THREADS'] = 16
-os.environ['GOTO_NUM_THREADS'] = 16
-os.environ['OMP_NUM_THREADS'] = 16
-os.environ['openmp'] = True
+os.environ['MKL_NUM_THREADS'] = '16'
+os.environ['GOTO_NUM_THREADS'] = '16'
+os.environ['OMP_NUM_THREADS'] = '16'
+os.environ['openmp'] = 'True'
 
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../../")
@@ -33,7 +33,7 @@ print("Importing mrcnn model")
 from mrcnn import model as modellib, utils
 print("Successfully imported mrcnn model...")
 print("Importing mrcnn visualize")
-from mrcnn import visualize
+# from mrcnn import visualize
 print("Successfully imported mrcnn visualize...")
 
 
@@ -81,6 +81,8 @@ class CoinConfig(Config):
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
     IMAGES_PER_GPU = 4
+
+    GPU_COUNT = 16
 
     # Number of classes (including background)
     NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
