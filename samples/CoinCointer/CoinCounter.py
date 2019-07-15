@@ -14,7 +14,6 @@ os.environ['GOTO_NUM_THREADS'] = 16
 os.environ['OMP_NUM_THREADS'] = 16
 os.environ['openmp'] = True
 
-
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../../")
 print("Root dir:", ROOT_DIR)
