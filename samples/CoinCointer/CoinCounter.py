@@ -9,6 +9,11 @@ import skimage.io
 import skimage.transform as skit
 import glob
 
+os.environ['MKL_NUM_THREADS'] = 16
+os.environ['GOTO_NUM_THREADS'] = 16
+os.environ['OMP_NUM_THREADS'] = 16
+os.environ['openmp'] = True
+
 
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../../")
@@ -76,7 +81,7 @@ class CoinConfig(Config):
 
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
-    IMAGES_PER_GPU = 1
+    IMAGES_PER_GPU = 4
 
     # Number of classes (including background)
     NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
@@ -307,6 +312,28 @@ class CoinDataset(utils.Dataset):
         self.add_class("Coin", 4, "quarter")
         self.add_class("Coin", 5, "loonie")
         self.add_class("Coin", 6, "toonie")
+
+
+class OptimizeHyperparametersConfig(Config):
+    """Creates a config for the process of hyperparameter optimization"""
+
+    # Give the configuration a recognizable name
+    NAME = "coin"
+
+    # We use a GPU with 12GB memory, which can fit two images.
+    # Adjust down if you use a smaller GPU.
+    IMAGES_PER_GPU = 1
+
+    # Number of classes (including background)
+    NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
+
+    # Number of training steps per epoch
+    STEPS_PER_EPOCH = 100
+
+    LEARNING_RATE = 0.0009
+    LEARNING_MOMENTUM = 0.9
+
+    DETECTION_MIN_CONFIDENCE = 0.7
 
 
 def optimize_hyperparameters(num_of_cylces=5, method="grid_search"):
