@@ -387,6 +387,8 @@ def optimize_hyperparameters(num_of_cylces=30, epochs=2):
                         epochs=epochs,
                         layers='heads')
 
+        loss = model_hpo.keras_model.loss
+        print("loss:", loss)
 
 
 
