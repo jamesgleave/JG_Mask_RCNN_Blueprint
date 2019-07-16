@@ -316,8 +316,8 @@ class OptimizeHyperparametersConfig(Config):
 
     """Creates a config for the process of hyperparameter optimization"""
 
-    STEPS_PER_EPOCH = 10
-    VALIDATION_STEPS = 5
+    STEPS_PER_EPOCH = 1
+    VALIDATION_STEPS = 1
 
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
@@ -344,14 +344,14 @@ class OptimizeHyperparametersConfig(Config):
         self.WEIGHT_DECAY = np.random.uniform(wd_min, wd_max)
 
 
-def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs=2):
+def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs=1):
     """Giving a range of values, this function uses random search to approximate the optimal
         hyperparameters for a giving RCNN. The benchmark model is the initial config.
         Therefor; the first model tested will be using the hyperparameters specified
         by the user. The epochs and steps, however; will be normalized.
     """
 
-    loss_dict = {}
+    config_list = []
 
     learning_rate_range = [0.0005, 0.002]
     learning_momentum_range = [0.5, 0.99]
@@ -368,6 +368,8 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
     benchmark_model.config.NAME = "Benchmark"
 
     model_hpo = benchmark_model
+    print(model_hpo.keras_model.get_losses_for())
+    print(model_hpo.keras_model.loss)
 
     for index in range(num_of_cylces):
 
@@ -390,20 +392,28 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         print("")
 
         print("Training network heads of", index)
-        model.train(dataset_train, dataset_val,
-                    learning_rate=config.LEARNING_RATE,
-                    epochs=epochs,
-                    layers='heads')
+        model_hpo.train(dataset_train, dataset_val,
+                        learning_rate=config.LEARNING_RATE,
+                        epochs=epochs,
+                        layers='heads')
 
         loss = model_hpo.keras_model.loss
         print("loss:", loss)
-        loss_name_pair = {model.config.NAME: "loss:" + str(loss)}
-        loss_dict.update(loss_name_pair)
+
+        loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
+        config_list.append(loss_config_name)
 
         config_hpo.set_params(hyperparameter_dict, index)
 
         model_hpo = modellib.MaskRCNN(mode="training", config=config_hpo,
                                       model_dir=log_path)
+
+    opt_hyperparameters = config_list[0]
+    for c in config_list:
+        loss, con, name = c
+        if loss < opt_hyperparameters[0]:
+            opt_hyperparameters = c
+    print("The optimal hyperparameters are approximately:", opt_hyperparameters)
 
 
 def train(model):
