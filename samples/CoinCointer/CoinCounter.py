@@ -317,6 +317,7 @@ class OptimizeHyperparametersConfig(Config):
     """Creates a config for the process of hyperparameter optimization"""
 
     STEPS_PER_EPOCH = 10
+    VALIDATION_STEPS = 5
 
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
