@@ -30,7 +30,7 @@ print("Importing mrcnn model")
 from mrcnn import model as modellib, utils
 print("Successfully imported mrcnn model...")
 print("Importing mrcnn visualize")
-# from mrcnn import visualize
+from mrcnn import visualize
 print("Successfully imported mrcnn visualize...")
 
 
@@ -89,6 +89,8 @@ class CoinConfig(Config):
     LEARNING_MOMENTUM = 0.9
 
     DETECTION_MIN_CONFIDENCE = 0.7
+
+    BACKBONE = "resnet50"
 
 
 def get_available_devices():
@@ -312,46 +314,28 @@ class CoinDataset(utils.Dataset):
 
 class OptimizeHyperparametersConfig(Config):
     """Creates a config for the process of hyperparameter optimization"""
-
-    # Give the configuration a recognizable name
-    NAME = "coin"
-
-    # We use a GPU with 12GB memory, which can fit two images.
-    # Adjust down if you use a smaller GPU.
-    IMAGES_PER_GPU = 1
-
-    # Number of classes (including background)
-    NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
-
-    # Number of training steps per epoch
-    STEPS_PER_EPOCH = 100
-
-    LEARNING_RATE = 0.0009
-    LEARNING_MOMENTUM = 0.9
-
-    DETECTION_MIN_CONFIDENCE = 0.7
+    def set_params(self, hyperparameters):
+        """Sets the hyperparameters"""
 
 
-def optimize_hyperparameters(num_of_cylces=5, method="grid_search"):
+
+def optimize_hyperparameters(num_of_cylces=5):
+    learning_rate_range = [0.0005, 0.002]
+    learning_momentum_range = [0.5, 0.99]
+
+
     """Runs a specified amount of iterations to fine-tune the hyperparameters
     1. create model -
-        config = coinConfig()
+        config = OptimizeHyperparametersConfig()
+        config.set_params()
         model = modellib.MaskRCNN(mode="training", config=config,
                                   model_dir=args.logs)
 
-    2. read the method (default is grid search)
-            if method == 'grid_search":
-                do something
-            elif method == random_search:
-                do something else
-            else:
-                throw error (user entered something incorrect
+    2. run the default config
 
-    3. run the default config
+    3. Find the loss after n steps and m epochs (benchmark)
 
-    4. Find the loss after n steps and m epochs (benchmark)
-
-    5.
+    4.
     """
 
 
