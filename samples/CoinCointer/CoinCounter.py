@@ -325,24 +325,24 @@ class OptimizeHyperparametersConfig(Config):
         self.NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
 
         # Number of training steps per epoch
-        self.STEPS_PER_EPOCH = 100
+        self.STEPS_PER_EPOCH = 2
 
         self.DETECTION_MIN_CONFIDENCE = 0.7
 
         """Sets the tunable hyperparameters"""
-        self.NAME = "SET:" + index
+        self.NAME = "SET:" + str(index)
 
         # Get the learning rate
         lr_min, lr_max = hyperparameters["lr"][0], hyperparameters["lr"][1]
-        self.LEARNING_RATE = np.random.rand(lr_min, lr_max)
+        self.LEARNING_RATE = np.random.uniform(lr_min, lr_max)
 
         # Get the learning momentum
         lm_min, lm_max = hyperparameters["lm"][0], hyperparameters["lm"][1]
-        self.LEARNING_MOMENTUM = np.random.rand(lm_min, lm_max)
+        self.LEARNING_MOMENTUM = np.random.uniform(lm_min, lm_max)
 
         # Get the weight decay
         wd_min, wd_max = hyperparameters["wd"][0], hyperparameters["wd"][1]
-        self.WEIGHT_DECAY = np.random.rand(wd_min, wd_max)
+        self.WEIGHT_DECAY = np.random.uniform(wd_min, wd_max)
 
 
 def optimize_hyperparameters(num_of_cylces=30, epochs=2):
@@ -370,15 +370,23 @@ def optimize_hyperparameters(num_of_cylces=30, epochs=2):
         dataset_val.load_coin(args.dataset, "val")
         dataset_val.prepare()
 
+        print("************")
+        print("Iteration:", model_hpo.config.NAME)
+        print("lr:", model_hpo.config.LEARNING_RATE)
+        print("lm:", model_hpo.config.LEARNING_MOMENTUM)
+        print("wd:", model_hpo.config.WEIGHT_DECAY)
+        print("")
+
         # *** This training schedule is an example. Update to your needs ***
         # Since we're using a very small dataset, and starting from
         # COCO trained weights, we don't need to train too long. Also,
         # no need to train all layers, just the heads should do it.
         print("Training network heads")
         model_hpo.train(dataset_train, dataset_val,
-                        learning_rate=config.LEARNING_RATE,
+                        learning_rate=config_hpo.LEARNING_RATE,
                         epochs=epochs,
                         layers='heads')
+
 
 
 
@@ -580,7 +588,7 @@ if __name__ == '__main__':
         description='Train Mask R-CNN to detect coins.')
     parser.add_argument("command",
                         metavar="<command>",
-                        help="'train' or 'splash' or 'inference'")
+                        help="'train' or 'splash' or 'inference' or optimizeHP")
     parser.add_argument('--dataset', required=False,
                         metavar="/path/to/coin/dataset/",
                         help='Directory of the coin dataset')
@@ -596,6 +604,9 @@ if __name__ == '__main__':
                         help='Image to apply the color splash effect on')
     parser.add_argument('--video', required=False,
                         metavar="path or URL to video",
+                        help='Video to apply the color splash effect on')
+    parser.add_argument('--epochs', required=False,
+                        metavar="amount of epochs for hyperparameter optimization",
                         help='Video to apply the color splash effect on')
 
     args = parser.parse_args()
@@ -668,6 +679,8 @@ if __name__ == '__main__':
                                 video_path=args.video)
     elif args.command == "inference":
         inference(model_inf=model, path=args.image)
+    elif args.command == "optimizeHP":
+        optimize_hyperparameters()
     else:
         print("'{}' is not recognized. "
               "Use 'train' or 'splash'".format(args.command))
