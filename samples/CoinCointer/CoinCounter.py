@@ -350,6 +350,8 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         by the user. The epochs and steps, however; will be normalized.
     """
 
+    loss_dict = {}
+
     learning_rate_range = [0.0005, 0.002]
     learning_momentum_range = [0.5, 0.99]
     weight_decay_range = [0.00007, 0.00014]
@@ -360,9 +362,9 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
     config_hpo = OptimizeHyperparametersConfig()
     config_hpo.IMAGES_PER_GPU = benchmark_model.config.IMAGES_PER_GPU
     config_hpo.NUM_CLASSES = benchmark_model.config.NUM_CLASSES
-    config_hpo.NAME = "Benchmark"
 
     benchmark_model.config.STEPS_PER_EPOCH = config_hpo.STEPS_PER_EPOCH
+    benchmark_model.config.NAME = "Benchmark"
 
     model_hpo = benchmark_model
 
@@ -394,6 +396,8 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
 
         loss = model_hpo.keras_model.loss
         print("loss:", loss)
+        loss_name_pair = {model.config.NAME: "loss:" + str(loss)}
+        loss_dict.update(loss_name_pair)
 
         config_hpo.set_params(hyperparameter_dict, index)
 
