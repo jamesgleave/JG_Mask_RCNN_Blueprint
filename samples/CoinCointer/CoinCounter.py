@@ -345,8 +345,6 @@ class OptimizeHyperparametersConfig(Config):
         self.WEIGHT_DECAY = np.random.rand(wd_min, wd_max)
 
 
-
-
 def optimize_hyperparameters(num_of_cylces=30, epochs=2):
     learning_rate_range = [0.0005, 0.002]
     learning_momentum_range = [0.5, 0.99]
@@ -361,7 +359,27 @@ def optimize_hyperparameters(num_of_cylces=30, epochs=2):
         model_hpo = modellib.MaskRCNN(mode="training", config=config_hpo,
                                       model_dir=args.logs)
 
-        train(model_hpo)
+        """Train the model."""
+        # Training dataset.
+        dataset_train = CoinDataset()
+        dataset_train.load_coin(args.dataset, "train")
+        dataset_train.prepare()
+
+        # Validation dataset
+        dataset_val = CoinDataset()
+        dataset_val.load_coin(args.dataset, "val")
+        dataset_val.prepare()
+
+        # *** This training schedule is an example. Update to your needs ***
+        # Since we're using a very small dataset, and starting from
+        # COCO trained weights, we don't need to train too long. Also,
+        # no need to train all layers, just the heads should do it.
+        print("Training network heads")
+        model_hpo.train(dataset_train, dataset_val,
+                        learning_rate=config.LEARNING_RATE,
+                        epochs=epochs,
+                        layers='heads')
+
 
 
     """Runs a specified amount of iterations to fine-tune the hyperparameters
