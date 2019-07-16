@@ -315,22 +315,20 @@ class CoinDataset(utils.Dataset):
 class OptimizeHyperparametersConfig(Config):
 
     """Creates a config for the process of hyperparameter optimization"""
+
+    STEPS_PER_EPOCH = 10
+
+    # We use a GPU with 12GB memory, which can fit two images.
+    # Adjust down if you use a smaller GPU.
+    IMAGES_PER_GPU = 1
+
+    # Number of classes (including background)
+    NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
+
     def set_params(self, hyperparameters, index):
 
-        # We use a GPU with 12GB memory, which can fit two images.
-        # Adjust down if you use a smaller GPU.
-        self.IMAGES_PER_GPU = 1
-
-        # Number of classes (including background)
-        self.NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
-
-        # Number of training steps per epoch
-        self.STEPS_PER_EPOCH = 2
-
-        self.DETECTION_MIN_CONFIDENCE = 0.7
-
         """Sets the tunable hyperparameters"""
-        self.NAME = "SET:" + str(index)
+        self.NAME = "V-" + str(index)
 
         # Get the learning rate
         lr_min, lr_max = hyperparameters["lr"][0], hyperparameters["lr"][1]
@@ -345,19 +343,30 @@ class OptimizeHyperparametersConfig(Config):
         self.WEIGHT_DECAY = np.random.uniform(wd_min, wd_max)
 
 
-def optimize_hyperparameters( log_path, num_of_cylces=30, epochs=2):
+def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs=2):
+    """Giving a range of values, this function uses random search to approximate the optimal
+        hyperparameters for a giving RCNN. The benchmark model is the initial config.
+        Therefor; the first model tested will be using the hyperparameters specified
+        by the user. The epochs and steps, however; will be normalized.
+    """
+
     learning_rate_range = [0.0005, 0.002]
     learning_momentum_range = [0.5, 0.99]
     weight_decay_range = [0.00007, 0.00014]
 
     hyperparameter_dict = {"lr": learning_rate_range, "lm": learning_momentum_range, "wd": weight_decay_range}
 
-    for index in range(num_of_cylces):
-        config_hpo = OptimizeHyperparametersConfig()
-        config_hpo.set_params(hyperparameter_dict, index)
+    # Sets the certain values to the specified config's values.
+    config_hpo = OptimizeHyperparametersConfig()
+    config_hpo.IMAGES_PER_GPU = benchmark_model.config.IMAGES_PER_GPU
+    config_hpo.NUM_CLASSES = benchmark_model.config.NUM_CLASSES
+    config_hpo.NAME = "Benchmark"
 
-        model_hpo = modellib.MaskRCNN(mode="training", config=config_hpo,
-                                      model_dir=log_path)
+    benchmark_model.config.STEPS_PER_EPOCH = config_hpo.STEPS_PER_EPOCH
+
+    model_hpo = benchmark_model
+
+    for index in range(num_of_cylces):
 
         """Train the model."""
         # Training dataset.
@@ -371,25 +380,25 @@ def optimize_hyperparameters( log_path, num_of_cylces=30, epochs=2):
         dataset_val.prepare()
 
         print("************")
-        print("Iteration:", model_hpo.config.NAME)
+        print("Name:", model_hpo.config.NAME)
         print("lr:", model_hpo.config.LEARNING_RATE)
         print("lm:", model_hpo.config.LEARNING_MOMENTUM)
         print("wd:", model_hpo.config.WEIGHT_DECAY)
         print("")
 
-        # *** This training schedule is an example. Update to your needs ***
-        # Since we're using a very small dataset, and starting from
-        # COCO trained weights, we don't need to train too long. Also,
-        # no need to train all layers, just the heads should do it.
-        print("Training network heads")
-        train(model_hpo)
-        model_hpo.train(dataset_train, dataset_val,
-                        learning_rate=config.LEARNING_RATE,
-                        epochs=epochs,
-                        layers='heads')
+        print("Training network heads of", index)
+        model.train(dataset_train, dataset_val,
+                    learning_rate=config.LEARNING_RATE,
+                    epochs=epochs,
+                    layers='heads')
 
         loss = model_hpo.keras_model.loss
         print("loss:", loss)
+
+        config_hpo.set_params(hyperparameter_dict, index)
+
+        model_hpo = modellib.MaskRCNN(mode="training", config=config_hpo,
+                                      model_dir=log_path)
 
 
 def train(model):
@@ -628,6 +637,9 @@ if __name__ == '__main__':
     if args.command == "train":
         model = modellib.MaskRCNN(mode="training", config=config,
                                   model_dir=args.logs)
+    elif args.command == "optimizeHP":
+        model = modellib.MaskRCNN(mode="training", config=config,
+                                  model_dir=args.logs)
     else:
         model = modellib.MaskRCNN(mode="inference", config=config,
                                   model_dir=args.logs)
@@ -667,7 +679,7 @@ if __name__ == '__main__':
     elif args.command == "inference":
         inference(model_inf=model, path=args.image)
     elif args.command == "optimizeHP":
-        optimize_hyperparameters(log_path=args.logs)
+        optimize_hyperparameters(log_path=args.logs, benchmark_model=model)
     else:
         print("'{}' is not recognized. "
               "Use 'train' or 'splash'".format(args.command))
