@@ -316,7 +316,7 @@ class OptimizeHyperparametersConfig(Config):
 
     """Creates a config for the process of hyperparameter optimization"""
 
-    STEPS_PER_EPOCH = 1
+    STEPS_PER_EPOCH = 2
     VALIDATION_STEPS = 1
 
     # We use a GPU with 12GB memory, which can fit two images.
@@ -368,8 +368,6 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
     benchmark_model.config.NAME = "Benchmark"
 
     model_hpo = benchmark_model
-    print(model_hpo.keras_model.get_losses_for())
-    print(model_hpo.keras_model.loss)
 
     for index in range(num_of_cylces):
 
@@ -397,7 +395,17 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
                         epochs=epochs,
                         layers='heads')
 
-        loss = model_hpo.keras_model.loss
+        print(model_hpo.keras_model.total_loss)
+        loss = model_hpo.keras_model.get_losses_for(None)
+        i = 0
+        for val in loss:
+            i += 1
+            print("value of loss:", val, "at index", i)
+
+        loss = model_hpo.keras_model.total_loss
+        for val in loss:
+            i += 1
+            print("value of total_loss:", val, "at index", i)
         print("loss:", loss)
 
         loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
