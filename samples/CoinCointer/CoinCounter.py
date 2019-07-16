@@ -413,7 +413,9 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         loss, con, name = c
         if loss < opt_hyperparameters[0]:
             opt_hyperparameters = c
-    print("The optimal hyperparameters are approximately:", opt_hyperparameters)
+    print("The optimal hyperparameters are approximately", opt_hyperparameters[2])
+    print("With a loss of", opt_hyperparameters[0])
+    print("The config was", opt_hyperparameters[3])
 
 
 def train(model):

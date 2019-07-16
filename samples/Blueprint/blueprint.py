@@ -246,6 +246,105 @@ class BlueprintDataset(utils.Dataset):
         return
 
 
+class OptimizeHyperparametersConfig(Config):
+
+    """Creates a config for the process of hyperparameter optimization"""
+
+    STEPS_PER_EPOCH = 1
+    VALIDATION_STEPS = 1
+
+    def set_params(self, hyperparameters, index):
+
+        """Sets the tunable hyperparameters"""
+        self.NAME = "V-" + str(index)
+
+        # Get the learning rate
+        lr_min, lr_max = hyperparameters["lr"][0], hyperparameters["lr"][1]
+        self.LEARNING_RATE = np.random.uniform(lr_min, lr_max)
+
+        # Get the learning momentum
+        lm_min, lm_max = hyperparameters["lm"][0], hyperparameters["lm"][1]
+        self.LEARNING_MOMENTUM = np.random.uniform(lm_min, lm_max)
+
+        # Get the weight decay
+        wd_min, wd_max = hyperparameters["wd"][0], hyperparameters["wd"][1]
+        self.WEIGHT_DECAY = np.random.uniform(wd_min, wd_max)
+
+
+def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs=1):
+    """Giving a range of values, this function uses random search to approximate the optimal
+        hyperparameters for a giving RCNN. The benchmark model is the initial config.
+        Therefor; the first model tested will be using the hyperparameters specified
+        by the user. The epochs and steps, however; will be normalized.
+    """
+
+    config_list = []
+
+    learning_rate_range = [0.0005, 0.002]
+    learning_momentum_range = [0.5, 0.99]
+    weight_decay_range = [0.00007, 0.00014]
+
+    hyperparameter_dict = {"lr": learning_rate_range, "lm": learning_momentum_range, "wd": weight_decay_range}
+
+    # Sets the certain values to the specified config's values.
+    config_hpo = OptimizeHyperparametersConfig()
+    config_hpo.IMAGES_PER_GPU = benchmark_model.config.IMAGES_PER_GPU
+    config_hpo.NUM_CLASSES = benchmark_model.config.NUM_CLASSES
+
+    benchmark_model.config.STEPS_PER_EPOCH = config_hpo.STEPS_PER_EPOCH
+    benchmark_model.config.NAME = "Benchmark"
+
+    model_hpo = benchmark_model
+    print(model_hpo.keras_model.get_losses_for())
+    print(model_hpo.keras_model.loss)
+
+    for index in range(num_of_cylces):
+
+        """Train the model."""
+        # Training dataset.
+        dataset_train = BlueprintDataset()
+        dataset_train.load_blueprint(args.dataset, "train")
+        dataset_train.prepare()
+
+        # Validation dataset
+        dataset_val = BlueprintDataset()
+        dataset_val.load_blueprint(args.dataset, "val")
+        dataset_val.prepare()
+
+        print("************")
+        print("Name:", model_hpo.config.NAME)
+        print("lr:", model_hpo.config.LEARNING_RATE)
+        print("lm:", model_hpo.config.LEARNING_MOMENTUM)
+        print("wd:", model_hpo.config.WEIGHT_DECAY)
+        print("")
+
+        print("Training network heads of", index)
+        model_hpo.train(dataset_train, dataset_val,
+                        learning_rate=config.LEARNING_RATE,
+                        epochs=epochs,
+                        layers='heads')
+
+        loss = model_hpo.keras_model.loss
+        print("loss:", loss)
+
+        loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
+        config_list.append(loss_config_name)
+
+        config_hpo.set_params(hyperparameter_dict, index)
+
+        model_hpo = modellib.MaskRCNN(mode="training", config=config_hpo,
+                                      model_dir=log_path)
+
+    opt_hyperparameters = config_list[0]
+    for c in config_list:
+        loss, con, name = c
+        if loss < opt_hyperparameters[0]:
+            opt_hyperparameters = c
+    print("The optimal hyperparameters are approximately", opt_hyperparameters[2])
+    print("With a loss of", opt_hyperparameters[0])
+    print("The config was", opt_hyperparameters[3])
+
+
 def train(model):
     """Train the model."""
     # Training dataset.
@@ -401,7 +500,7 @@ if __name__ == '__main__':
         description='Train Mask R-CNN to detect blueprints.')
     parser.add_argument("command",
                         metavar="<command>",
-                        help="'train' or 'splash' or 'inference'")
+                        help="'train' or 'splash' or 'inference' or optimizeHP")
     parser.add_argument('--dataset', required=False,
                         metavar="/path/to/YOUR/dataset/",
                         help='Directory of the YOUR dataset')
@@ -450,6 +549,9 @@ if __name__ == '__main__':
     if args.command == "train":
         model = modellib.MaskRCNN(mode="training", config=config,
                                   model_dir=args.logs)
+    elif args.command == "optimizeHP":
+        model = modellib.MaskRCNN(mode="training", config=config,
+                                  model_dir=args.logs)
     else:
         model = modellib.MaskRCNN(mode="inference", config=config,
                                   model_dir=args.logs)
@@ -488,6 +590,8 @@ if __name__ == '__main__':
                                 video_path=args.video)
     elif args.command == "inference":
         inference(model_inf=model, path=args.image)
+    elif args.command == "optimizeHP":
+        optimize_hyperparameters(log_path=args.logs, benchmark_model=model)
     else:
         print("'{}' is not recognized. "
               "Use 'train' or 'splash'".format(args.command))
