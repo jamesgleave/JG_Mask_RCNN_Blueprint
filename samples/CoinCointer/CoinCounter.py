@@ -345,7 +345,7 @@ class OptimizeHyperparametersConfig(Config):
         self.WEIGHT_DECAY = np.random.uniform(wd_min, wd_max)
 
 
-def optimize_hyperparameters(num_of_cylces=30, epochs=2):
+def optimize_hyperparameters( log_path, num_of_cylces=30, epochs=2):
     learning_rate_range = [0.0005, 0.002]
     learning_momentum_range = [0.5, 0.99]
     weight_decay_range = [0.00007, 0.00014]
@@ -357,7 +357,7 @@ def optimize_hyperparameters(num_of_cylces=30, epochs=2):
         config_hpo.set_params(hyperparameter_dict, index)
 
         model_hpo = modellib.MaskRCNN(mode="training", config=config_hpo,
-                                      model_dir=args.logs)
+                                      model_dir=log_path)
 
         """Train the model."""
         # Training dataset.
@@ -382,29 +382,14 @@ def optimize_hyperparameters(num_of_cylces=30, epochs=2):
         # COCO trained weights, we don't need to train too long. Also,
         # no need to train all layers, just the heads should do it.
         print("Training network heads")
+        train(model_hpo)
         model_hpo.train(dataset_train, dataset_val,
-                        learning_rate=config_hpo.LEARNING_RATE,
+                        learning_rate=config.LEARNING_RATE,
                         epochs=epochs,
                         layers='heads')
 
         loss = model_hpo.keras_model.loss
         print("loss:", loss)
-
-
-
-    """Runs a specified amount of iterations to fine-tune the hyperparameters
-    1. create model -
-        config = OptimizeHyperparametersConfig()
-        config.set_params()
-        model = modellib.MaskRCNN(mode="training", config=config,
-                                  model_dir=args.logs)
-
-    2. run the default config
-
-    3. Find the loss after n steps and m epochs (benchmark)
-
-    4.
-    """
 
 
 def train(model):
@@ -682,7 +667,7 @@ if __name__ == '__main__':
     elif args.command == "inference":
         inference(model_inf=model, path=args.image)
     elif args.command == "optimizeHP":
-        optimize_hyperparameters()
+        optimize_hyperparameters(log_path=args.logs)
     else:
         print("'{}' is not recognized. "
               "Use 'train' or 'splash'".format(args.command))
