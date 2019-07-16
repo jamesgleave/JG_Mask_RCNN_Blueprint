@@ -90,7 +90,7 @@ class CoinConfig(Config):
 
     DETECTION_MIN_CONFIDENCE = 0.7
 
-    BACKBONE = "resnet50"
+    BACKBONE = "resnet101"
 
 
 def get_available_devices():
@@ -313,15 +313,55 @@ class CoinDataset(utils.Dataset):
 
 
 class OptimizeHyperparametersConfig(Config):
+
     """Creates a config for the process of hyperparameter optimization"""
-    def set_params(self, hyperparameters):
-        """Sets the hyperparameters"""
+    def set_params(self, hyperparameters, index):
+
+        # We use a GPU with 12GB memory, which can fit two images.
+        # Adjust down if you use a smaller GPU.
+        self.IMAGES_PER_GPU = 1
+
+        # Number of classes (including background)
+        self.NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
+
+        # Number of training steps per epoch
+        self.STEPS_PER_EPOCH = 100
+
+        self.DETECTION_MIN_CONFIDENCE = 0.7
+
+        """Sets the tunable hyperparameters"""
+        self.NAME = "SET:" + index
+
+        # Get the learning rate
+        lr_min, lr_max = hyperparameters["lr"][0], hyperparameters["lr"][1]
+        self.LEARNING_RATE = np.random.rand(lr_min, lr_max)
+
+        # Get the learning momentum
+        lm_min, lm_max = hyperparameters["lm"][0], hyperparameters["lm"][1]
+        self.LEARNING_MOMENTUM = np.random.rand(lm_min, lm_max)
+
+        # Get the weight decay
+        wd_min, wd_max = hyperparameters["wd"][0], hyperparameters["wd"][1]
+        self.WEIGHT_DECAY = np.random.rand(wd_min, wd_max)
 
 
 
-def optimize_hyperparameters(num_of_cylces=5):
+
+def optimize_hyperparameters(num_of_cylces=30, epochs=2):
     learning_rate_range = [0.0005, 0.002]
     learning_momentum_range = [0.5, 0.99]
+    weight_decay_range = [0.00007, 0.00014]
+
+    hyperparameter_dict = {"lr": learning_rate_range, "lm": learning_momentum_range, "wd": weight_decay_range}
+
+    for index in range(num_of_cylces):
+        config_hpo = OptimizeHyperparametersConfig()
+        config_hpo.set_params(hyperparameter_dict, index)
+
+        model_hpo = modellib.MaskRCNN(mode="training", config=config_hpo,
+                                      model_dir=args.logs)
+
+        train(model_hpo)
 
 
     """Runs a specified amount of iterations to fine-tune the hyperparameters
