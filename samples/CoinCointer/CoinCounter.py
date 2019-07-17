@@ -403,7 +403,8 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
             print("value of loss:", val, "at index", i)
 
         loss = model_hpo.keras_model.total_loss
-        np.array(loss)
+        loss = np.array(loss)
+        print(loss)
         print("loss:", loss)
 
         loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
