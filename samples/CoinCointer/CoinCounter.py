@@ -34,7 +34,7 @@ print("Importing mrcnn model")
 from mrcnn import model as modellib, utils
 print("Successfully imported mrcnn model...")
 print("Importing mrcnn visualize")
-from mrcnn import visualize
+# from mrcnn import visualize
 print("Successfully imported mrcnn visualize...")
 
 
