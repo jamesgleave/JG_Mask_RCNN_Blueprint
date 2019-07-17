@@ -402,8 +402,11 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
                         learning_rate=config.LEARNING_RATE,
                         epochs=epochs,
                         layers='heads')
+        from tensorflow.contrib import slim
 
-        loss = model_hpo.keras_model.total_loss
+        loss = slim.losses.get_total_loss()
+        session = tf.Session()
+        print(session.run(loss))
 
         print("\n\n\n\n******************************************************************")
         print("loss type", type(loss))
