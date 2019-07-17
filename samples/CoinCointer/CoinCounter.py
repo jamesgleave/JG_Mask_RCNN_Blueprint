@@ -420,7 +420,7 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         sess.run(init_l)
         print(loss)
         sess.run(loss)
-        print(sess.run(loss, feed_dict={"a": a}))
+        print(sess.run(loss, feed_dict={'input_gt_boxes': a}))
         sess.close()
 
         x = 5/0
