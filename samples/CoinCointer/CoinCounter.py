@@ -9,10 +9,6 @@ import skimage.color
 import skimage.io
 import glob
 
-
-
-
-
 print("OS.name:", os.name)
 
 # Root directory of the project
@@ -315,6 +311,9 @@ class CoinDataset(utils.Dataset):
         self.add_class("Coin", 5, "loonie")
         self.add_class("Coin", 6, "toonie")
 
+# *************************************************************** #
+# Hyperparameter Optimization                                     #
+# *************************************************************** #
 
 class OptimizeHyperparametersConfig(Config):
 
@@ -400,7 +399,14 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
                         layers='heads')
 
         loss_2 = model_hpo.keras_model.losses
-        tf.saved_model.save(loss_2, "/Users/martingleave/Documents/GitHub/JG_Mask_RCNN/JG_Mask_RCNN_Blueprint/logs")
+
+        print(loss_2)
+        print(type(loss_2))
+        print(loss_2.__dict__)
+        print(loss_2[0])
+        print(type(loss_2[0]))
+        print(tf.convert_to_tensor(loss_2[0]))
+        print(tf.convert_to_tensor(loss_2[0]).eval())
 
         x = 5/0
 
@@ -420,6 +426,10 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
     print("The optimal hyperparameters are approximately", opt_hyperparameters[2])
     print("With a loss of", opt_hyperparameters[0])
     print("The config was", opt_hyperparameters[3])
+
+
+# *************************************************************** #
+# *************************************************************** #
 
 
 def train(model):

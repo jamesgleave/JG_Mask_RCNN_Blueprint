@@ -21,7 +21,6 @@ from tensorflow.python.training import sync_replicas_optimizer
 from tensorflow.python.training import training_util
 from mrcnn import model as modellib, utils
 from tensorflow.python.ops.losses.losses import get_total_loss
-from tensorflow.contrib import slim
-loss = slim.losses.get_total_loss()
-print(loss)
+from keras.engine import saving
+
 
