@@ -402,22 +402,13 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
                         learning_rate=config.LEARNING_RATE,
                         epochs=epochs,
                         layers='heads')
-        from tensorflow.contrib import slim
-
-        loss = slim.losses.get_losses()
-
-        print("\n\n\n\n******************************************************************")
-        print("loss type", type(loss))
-        print("loss list", loss)
-        print("\n\n\n\n")
-        print("model_hpo.keras_model.losses", model_hpo.keras_model.losses)
 
         loss_2 = model_hpo.keras_model.losses
-        loss_2 = np.array(loss_2)
-        np.save("loss_2", loss_2)
+        tf.saved_model.save(loss_2, "/Users/martingleave/Documents/GitHub/JG_Mask_RCNN/JG_Mask_RCNN_Blueprint/logs")
+
         x = 5/0
 
-        loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
+        loss_config_name = (loss_2, model_hpo.config, model_hpo.config.NAME)
         config_list.append(loss_config_name)
 
         config_hpo.set_params(hyperparameter_dict, index)
