@@ -404,13 +404,12 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
                         layers='heads')
         from tensorflow.contrib import slim
 
-        loss = slim.losses.get_total_loss()
-        session = tf.Session()
-        print(session.run(loss))
+        loss = slim.losses.get_regularization_losses
 
         print("\n\n\n\n******************************************************************")
         print("loss type", type(loss))
-        print("loss", loss.eval())
+        print("loss shape", loss.shape)
+
         print("\n\n\n\n")
 
         x = 5/0
