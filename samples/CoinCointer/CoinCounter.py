@@ -407,11 +407,11 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         print(type(loss_2[0]))
         print(tf.convert_to_tensor(loss_2[0]))
 
-        t = tf.convert_to_tensor(loss_2[0])
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            t = tf.convert_to_tensor(loss_2[0])
+            print(t.eval())
 
-        sess = tf.compat.v1.InteractiveSession()
-        print(t.eval())
-        sess.close()
         x = 5/0
 
         loss_config_name = (loss_2, model_hpo.config, model_hpo.config.NAME)
