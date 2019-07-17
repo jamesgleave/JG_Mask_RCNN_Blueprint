@@ -393,31 +393,18 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         print("wd:", model_hpo.config.WEIGHT_DECAY)
         print("")
 
-        """ np print options
-        {'edgeitems': 3, 'threshold': 1000, 'floatmode': 'maxprec', 'precision': 8, 'suppress': False, 
-        'linewidth': 75, 'nanstr': 'nan', 'infstr': 'inf', 'sign': '-', 'formatter': None, 'legacy': False   """
-
         print("Training network heads of", index)
         model_hpo.train(dataset_train, dataset_val,
                         learning_rate=config.LEARNING_RATE,
                         epochs=epochs,
                         layers='heads')
-        from tensorflow.contrib import slim
-
-        loss = slim.losses.get_losses()
-
-        print("\n\n\n\n******************************************************************")
-        print("loss type", type(loss))
-        print("loss list", loss)
-        print("\n\n\n\n")
-        print("model_hpo.keras_model.losses", model_hpo.keras_model.losses)
 
         loss_2 = model_hpo.keras_model.losses
         loss_2 = np.array(loss_2)
         np.save("loss_2", loss_2)
         x = 5/0
 
-        loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
+        loss_config_name = (loss_2, model_hpo.config, model_hpo.config.NAME)
         config_list.append(loss_config_name)
 
         config_hpo.set_params(hyperparameter_dict, index)
@@ -485,6 +472,31 @@ def color_splash(image, mask):
         splash = np.where(mask, image, gray).astype(np.uint8)
     else:
         splash = gray.astype(np.uint8)
+    return splash
+
+
+def remove_background(image, mask):
+    """Blacks out all objects that are not balloons.
+    image: RGB image [height, width, 3]
+    mask: instance segmentation mask [height, width, instance count]
+
+    Returns result image.
+    """
+    # Make a blacked out copy of the image. The blacked out copy still
+    # has 3 RGB channels, though.
+    blackout = skimage.color.gray2rgb(skimage.color.rgb2gray(image)) * 0
+
+    blackout = np.array(blackout)
+    image = np.array(image)
+
+    # Copy color pixels from the original color image where mask is set
+    if mask.shape[-1] > 0:
+        # We're treating all instances as one, so collapse the mask into one layer
+        mask = (np.sum(mask, -1, keepdims=True) >= 1)
+        splash = np.where(mask, image, blackout).astype(np.uint8)
+    else:
+        splash = blackout.astype(np.uint8)
+
     return splash
 
 
