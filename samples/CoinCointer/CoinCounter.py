@@ -6,8 +6,11 @@ import numpy as np
 import skimage.draw
 import skimage.color
 import skimage.io
-import skimage.transform as skit
 import glob
+
+
+
+
 
 print("OS.name:", os.name)
 
@@ -398,21 +401,35 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
                         learning_rate=config.LEARNING_RATE,
                         epochs=epochs,
                         layers='heads')
-        from tensorflow.python.platform import tf_logging as logging
 
-        print(model_hpo.keras_model.total_loss)
-        loss = model_hpo.keras_model.get_losses_for(None)
-        i = 0
-        for val in loss:
-            i += 1
-            print("value of loss:", val, "at index", i)
+        from tensorflow.contrib.training.python.training import training
+        from tensorflow.core.protobuf import config_pb2
+        from tensorflow.python.client import timeline
+        from tensorflow.python.framework import constant_op
+        from tensorflow.python.framework import errors
+        from tensorflow.python.framework import ops
+        from tensorflow.python.lib.io import file_io
+        from tensorflow.python.ops import clip_ops
+        from tensorflow.python.ops import control_flow_ops
+        from tensorflow.python.ops import lookup_ops
+        from tensorflow.python.ops import math_ops
+        from tensorflow.python.ops import variables
+        from tensorflow.python.platform import tf_logging as logging
+        from tensorflow.python.summary import summary
+        from tensorflow.python.training import optimizer as tf_optimizer
+        from tensorflow.python.training import saver as tf_saver
+        from tensorflow.python.training import supervisor
+        from tensorflow.python.training import sync_replicas_optimizer
+        from tensorflow.python.training import training_util
 
         loss = model_hpo.keras_model.total_loss
-        logging.info('loss = %.4f',
+        print(logging)
+        logging.info('james loss = %.4f',
                      loss)
 
         print("\n\n\n\n******************************************************************")
         print("loss type", type(loss))
+        print()
 
         x = 5/0
 
