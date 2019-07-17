@@ -393,8 +393,6 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         {'edgeitems': 3, 'threshold': 1000, 'floatmode': 'maxprec', 'precision': 8, 'suppress': False, 
         'linewidth': 75, 'nanstr': 'nan', 'infstr': 'inf', 'sign': '-', 'formatter': None, 'legacy': False   """
 
-        print(model_hpo.keras_model.total_loss)
-
         print("Training network heads of", index)
         model_hpo.train(dataset_train, dataset_val,
                         learning_rate=config.LEARNING_RATE,
