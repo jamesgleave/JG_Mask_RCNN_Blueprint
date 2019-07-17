@@ -409,7 +409,7 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
 
         t = tf.convert_to_tensor(loss_2[0])
         loss = tf.multiply(t, tf.constant(1, dtype=tf.float32))
-        a = tf.placeholder((1, 1, 4), tf.float32)
+        a = tf.placeholder(tf.float32, (1, 1, 4))
 
         init_g = tf.global_variables_initializer()
         init_l = tf.local_variables_initializer()
