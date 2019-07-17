@@ -410,20 +410,7 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         print("loss type", type(loss))
         print("loss list", loss)
         print("\n\n\n\n")
-
-        loss = slim.losses.get_total_loss
-
-        print("\n\n\n\n******************************************************************")
-        print("loss type", type(loss))
-        print("loss list", loss)
-        print("\n\n\n\n")
-
-        loss = slim.losses.get_regularization_losses
-
-        print("\n\n\n\n******************************************************************")
-        print("loss type", type(loss))
-        print("loss list", loss)
-        print("\n\n\n\n")
+        print("model_hpo.keras_model.losses", model_hpo.keras_model.losses())
 
         x = 5/0
 
