@@ -407,10 +407,16 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         print(type(loss_2[0]))
         print(tf.convert_to_tensor(loss_2[0]))
 
+        t = tf.convert_to_tensor(loss_2[0])
+
+        # initialize the variable
+        init_op = tf.initialize_all_variables()
+
+        # run the graph
         with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
-            t = tf.convert_to_tensor(loss_2[0])
-            print(t.eval())
+            sess.run(init_op)  # execute init_op
+            # print the random values that we sample
+            print(sess.run(t))
 
         x = 5/0
 
