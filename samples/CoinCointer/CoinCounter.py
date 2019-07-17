@@ -399,65 +399,12 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
                         epochs=epochs,
                         layers='heads')
 
-        loss_2 = model_hpo.keras_model.losses
-
-        print(loss_2)
-        print(type(loss_2))
-        print(loss_2[0])
-        print(type(loss_2[0]))
-        print(tf.convert_to_tensor(loss_2[0]))
-
-        t = tf.convert_to_tensor(loss_2[0])
-        loss = tf.multiply(t, tf.constant(1, dtype=tf.float32))
-        a = tf.placeholder(tf.float32, (1, 1, 4))
-
-        init_g = tf.global_variables_initializer()
-        init_l = tf.local_variables_initializer()
-
-        try:
-            print("\n\n\n")
-            sess = tf.Session()
-            sess.run(init_g)
-            sess.run(init_l)
-            print(loss)
-            sess.run(loss)
-            print(sess.run(loss, feed_dict={'input_gt_boxes': a}))
-            sess.close()
-        except:
-            print("1 did not work")
-
-        try:
-            a = tf.placeholder(name="ph", shape=(1, 1, 4), dtype=tf.float32)
-
-            print("\n\n\n")
-            sess = tf.Session()
-            sess.run(init_g)
-            sess.run(init_l)
-            print(loss)
-            sess.run(loss)
-            print(sess.run(loss, feed_dict={'input_gt_boxes': a}))
-            sess.close()
-        except:
-            print("2 did not work")
-
-        try:
-            tf.reset_default_graph()
-            a = tf.placeholder(name="ph", shape=(1, 1, 4), dtype=tf.float32)
-
-            print("\n\n\n")
-            sess = tf.Session()
-            sess.run(init_g)
-            sess.run(init_l)
-            print(loss)
-            sess.run(loss)
-            print(sess.run(loss))
-            sess.close()
-        except:
-            print("3 did not work")
+        print(model_hpo.config.LOSS_WEIGHTS)
+        print(eval(model_hpo.keras_model.losses[0]))
 
         x = 5/0
-
-        loss_config_name = (loss_2, model_hpo.config, model_hpo.config.NAME)
+        loss = 0
+        loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
         config_list.append(loss_config_name)
 
         config_hpo.set_params(hyperparameter_dict, index)
