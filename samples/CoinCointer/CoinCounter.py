@@ -315,6 +315,7 @@ class CoinDataset(utils.Dataset):
 # Hyperparameter Optimization                                     #
 # *************************************************************** #
 
+
 class OptimizeHyperparametersConfig(Config):
 
     """Creates a config for the process of hyperparameter optimization"""
@@ -405,9 +406,11 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         print(loss_2[0])
         print(type(loss_2[0]))
         print(tf.convert_to_tensor(loss_2[0]))
+        sess = tf.compat.v1.Session()
+        print(sess.run(tf.convert_to_tensor(loss_2[0])))
+        print(sess.run(eval(tf.convert_to_tensor(loss_2[0]))))
 
-        print(tf.convert_to_tensor(loss_2[0]).eval(session=tf.get_default_session))
-
+        print(tf.convert_to_tensor(loss_2[0]).eval(session=sess))
         x = 5/0
 
         loss_config_name = (loss_2, model_hpo.config, model_hpo.config.NAME)
