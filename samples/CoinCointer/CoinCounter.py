@@ -398,6 +398,7 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
                         learning_rate=config.LEARNING_RATE,
                         epochs=epochs,
                         layers='heads')
+        from tensorflow.python.platform import tf_logging as logging
 
         print(model_hpo.keras_model.total_loss)
         loss = model_hpo.keras_model.get_losses_for(None)
@@ -407,6 +408,8 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
             print("value of loss:", val, "at index", i)
 
         loss = model_hpo.keras_model.total_loss
+        logging.info('loss = %.4f',
+                     loss)
 
         print("\n\n\n\n******************************************************************")
         print("loss type", type(loss))
