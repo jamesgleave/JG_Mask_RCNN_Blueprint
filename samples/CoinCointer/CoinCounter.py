@@ -402,11 +402,11 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
 
         print(loss_2)
         print(type(loss_2))
-        print(loss_2.__dict__)
         print(loss_2[0])
         print(type(loss_2[0]))
         print(tf.convert_to_tensor(loss_2[0]))
-        print(tf.convert_to_tensor(loss_2[0]).eval())
+
+        print(tf.convert_to_tensor(loss_2[0]).eval(session=tf.get_default_session))
 
         x = 5/0
 
