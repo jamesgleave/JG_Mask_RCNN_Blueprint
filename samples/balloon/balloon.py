@@ -243,17 +243,6 @@ def remove_background(image, mask):
     transparent_image = np.array(transparent_image)
     image = np.array(image)
 
-    print(type(transparent_image))
-    print(type(image))
-    print(type(blackout))
-    print(type(mask))
-
-    print("image:", image.shape)
-    print("image reshaped", image.reshape((image.shape[0], image.shape[1], )))
-    print("mask:", mask.shape)
-    print("b/o", blackout.shape)
-    print(len(transparent_image))
-
     # Copy color pixels from the original color image where mask is set
     if mask.shape[-1] > 0:
         # We're treating all instances as one, so collapse the mask into one layer
@@ -271,6 +260,13 @@ def create_transparent_image(mask):
     return transparent_image
 
 
+def print_image_info(image, image_name="Image"):
+    image = np.array(image)
+    print("Name:", image_name)
+    print("Shape of image:", image.shape)
+    print("Image type:", image.ctypes)
+
+
 def detect_and_color_splash(model, image_path=None, video_path=None):
     assert image_path or video_path
 
@@ -285,9 +281,10 @@ def detect_and_color_splash(model, image_path=None, video_path=None):
 
         # Color splash
         # splash = color_splash(image, r['masks'])
-        splash = color_splash(image, r['masks'])
+        splash = remove_background(image, r['masks'])
+        print_image_info(splash, "Splash")
         # Save output
-        file_name = "splash_{:%Y%m%dT%H%M%S}.png".format(datetime.datetime.now())
+        file_name = "image_{:%Y%m%dT%H%M%S}.jpg".format(datetime.datetime.now())
         skimage.io.imsave(file_name, splash)
     elif video_path:
         import cv2
