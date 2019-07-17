@@ -1,3 +1,3 @@
 import numpy as np
 
-np.ndarray.in
+x = np.random.randint(100, size=(3, 3, 3, 3, 3))

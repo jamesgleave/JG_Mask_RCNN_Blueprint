@@ -408,6 +408,7 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
 
         loss = model_hpo.keras_model.total_loss
 
+
         print("\n\n\n\n******************************************************************")
         print("Loss.shape", loss.shape)
         print("Loss.data:", loss.data)
