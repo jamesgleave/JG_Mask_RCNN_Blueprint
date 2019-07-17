@@ -408,12 +408,20 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         print(tf.convert_to_tensor(loss_2[0]))
 
         t = tf.convert_to_tensor(loss_2[0])
+        loss = tf.multiply(t, tf.constant(1, dtype=tf.float32))
+        a = tf.placeholder((1,1,4), tf.float32)
 
-        loss = tf.multiply(t, tf.constant(1))
+        init_g = tf.global_variables_initializer()
+        init_l = tf.local_variables_initializer()
+
         print("\n\n\n")
         sess = tf.Session()
+        sess.run(init_g)
+        sess.run(init_l)
+        print(loss)
         sess.run(loss)
-        print(sess.run(loss))
+        print(sess.run(loss, feed_dict={"a": a}))
+        sess.close()
 
         x = 5/0
 
