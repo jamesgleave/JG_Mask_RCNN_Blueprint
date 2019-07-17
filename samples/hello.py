@@ -19,10 +19,12 @@ from tensorflow.python.training import saver as tf_saver
 from tensorflow.python.training import supervisor
 from tensorflow.python.training import sync_replicas_optimizer
 from tensorflow.python.training import training_util
+from mrcnn import model as modellib, utils
+
 foo = tf.constant([1,2,3,4,5,6])
 # Tensor("Const:0", shape=(6,), dtype=int32)
 
 x = ops.convert_to_tensor(np.random.randint(100))
 
-
+x.eval()
 

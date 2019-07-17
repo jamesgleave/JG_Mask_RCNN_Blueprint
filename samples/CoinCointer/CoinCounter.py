@@ -407,8 +407,7 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
 
         print("\n\n\n\n******************************************************************")
         print("loss type", type(loss))
-        session = tf.Session()
-        print(session.run(loss))
+        print("loss", loss.eval())
         print("\n\n\n\n")
 
         x = 5/0
