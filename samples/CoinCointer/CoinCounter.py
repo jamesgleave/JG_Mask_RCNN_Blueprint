@@ -349,23 +349,6 @@ class OptimizeHyperparametersConfig(Config):
         self.WEIGHT_DECAY = np.random.uniform(wd_min, wd_max)
 
 
-class OptimizedModelSubclass(modellib.MaskRCNN):
-
-    def __init__(self, config, mode, model_dir):
-        super().__init__(config=config, mode=mode, model_dir=model_dir)
-        print("made instance")
-        self.model_loss = 0
-
-    def get_loss(self):
-        print(callback.History)
-        print(callback.K.eval(self.keras_model.losses))
-        self.model_loss = callback.K.eval(self.keras_model.losses)
-
-    # Added by JG_Mask_RCNN_Blueprint fork
-    # This is for the implementation of hyperparameter optimization
-    # This instance variable allows access to the loss of a model
-
-
 def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
     """Giving a range of values, this function uses random search to approximate the optimal
         hyperparameters for a giving RCNN. The benchmark model is the initial config.
@@ -373,7 +356,7 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
         by the user. The epochs and steps, however; will be normalized.
     """
 
-    history = callback
+    history = callback.Callback
 
     config_list = []
 
@@ -771,8 +754,7 @@ if __name__ == '__main__':
         model = modellib.MaskRCNN(mode="training", config=config,
                                   model_dir=args.logs)
     elif args.command == "optimizeHP":
-        print("making model")
-        model = OptimizedModelSubclass(mode="training", config=config,
+        model = modellib.MaskRCNN(mode="training", config=config,
                                        model_dir=args.logs)
     else:
         model = modellib.MaskRCNN(mode="inference", config=config,
