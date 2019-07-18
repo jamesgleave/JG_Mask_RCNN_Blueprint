@@ -406,7 +406,8 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
         model_hpo.train(dataset_train, dataset_val,
                         learning_rate=config.LEARNING_RATE,
                         epochs=epochs,
-                        layers='heads')
+                        layers='heads',
+                        custom_callbacks=history)
         print(history)
 
         loss = history
