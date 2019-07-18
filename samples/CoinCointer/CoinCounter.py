@@ -319,7 +319,7 @@ class CoinDataset(utils.Dataset):
 class MaskRCNN(modellib.MaskRCNN):
     def __init__(self, mode, model_dir, config):
         super().__init__(mode=mode, config=config, model_dir=model_dir)
-        self.history = None
+        self.history = keras.callbacks.History()
 
     def train(self, train_dataset, val_dataset, learning_rate, epochs, layers,
               augmentation=None, custom_callbacks=None, no_augmentation_sources=None):
@@ -480,9 +480,7 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
                         layers='heads')
 
         history = model_hpo.history
-        print(history)
-
-        loss = history
+        loss = history.history
         loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
         config_list.append(loss_config_name)
 
