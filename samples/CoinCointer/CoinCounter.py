@@ -316,6 +316,10 @@ class CoinDataset(utils.Dataset):
 # Hyperparameter Optimization                                     #
 # *************************************************************** #
 
+class MaskRcnnWithHistory(modellib.MaskRCNN):
+    def __init__(self, mode, model_dir, config):
+        super().__init__(mode=mode, config=config,model_dir=model_dir)
+
 
 class OptimizeHyperparametersConfig(Config):
 
@@ -398,10 +402,11 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
 
         print("Training network heads of", index)
 
-        history = model_hpo.train(dataset_train, dataset_val,
-                                  learning_rate=config.LEARNING_RATE,
-                                  epochs=epochs,
-                                  layers='heads')
+        history = keras.callbacks.CallbackList()
+        model_hpo.train(dataset_train, dataset_val,
+                        learning_rate=config.LEARNING_RATE,
+                        epochs=epochs,
+                        layers='heads')
         print(history)
 
         loss = history
