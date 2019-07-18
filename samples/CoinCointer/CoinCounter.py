@@ -356,7 +356,6 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
         by the user. The epochs and steps, however; will be normalized.
     """
 
-    history = keras.callbacks.History().history
     config_list = []
 
     log_path = benchmark_model.model_dir
@@ -398,11 +397,11 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
         print("")
 
         print("Training network heads of", index)
-        model_hpo.train(dataset_train, dataset_val,
-                        learning_rate=config.LEARNING_RATE,
-                        epochs=epochs,
-                        layers='heads',
-                        custom_callbacks=history)
+
+        history = model_hpo.train(dataset_train, dataset_val,
+                                  learning_rate=config.LEARNING_RATE,
+                                  epochs=epochs,
+                                  layers='heads')
         print(history)
 
         loss = history
