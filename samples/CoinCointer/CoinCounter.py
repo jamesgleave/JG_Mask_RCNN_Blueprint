@@ -474,12 +474,12 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
 
         print("Training network heads of", index)
 
-        history = model_hpo.history
         model_hpo.train(dataset_train, dataset_val,
                         learning_rate=config.LEARNING_RATE,
                         epochs=epochs,
-                        layers='heads',
-                        custom_callbacks=history)
+                        layers='heads')
+
+        history = model_hpo.history
         print(history)
 
         loss = history
