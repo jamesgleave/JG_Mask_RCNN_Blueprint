@@ -3,7 +3,7 @@ import sys
 import json
 import datetime
 import numpy as np
-import keras.callbacks as callback
+import keras
 import skimage.draw
 import skimage.color
 import skimage.io
@@ -356,8 +356,7 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
         by the user. The epochs and steps, however; will be normalized.
     """
 
-    history = callback.Callback
-
+    history = keras.callbacks.CallbackList
     config_list = []
 
     log_path = benchmark_model.model_dir
