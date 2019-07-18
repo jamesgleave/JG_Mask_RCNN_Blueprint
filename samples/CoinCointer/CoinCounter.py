@@ -316,9 +316,81 @@ class CoinDataset(utils.Dataset):
 # Hyperparameter Optimization                                     #
 # *************************************************************** #
 
-class MaskRcnnWithHistory(modellib.MaskRCNN):
+class MaskRCNN(modellib.MaskRCNN):
     def __init__(self, mode, model_dir, config):
-        super().__init__(mode=mode, config=config,model_dir=model_dir)
+        super().__init__(mode=mode, config=config, model_dir=model_dir)
+        self.history = None
+
+    def train(self, train_dataset, val_dataset, learning_rate, epochs, layers,
+              augmentation=None, custom_callbacks=None, no_augmentation_sources=None):
+
+        assert self.mode == "training", "Create model in training mode."
+
+        # Pre-defined layer regular expressions
+        layer_regex = {
+            # all layers but the backbone
+            "heads": r"(mrcnn\_.*)|(rpn\_.*)|(fpn\_.*)",
+            # From a specific Resnet stage and up
+            "3+": r"(res3.*)|(bn3.*)|(res4.*)|(bn4.*)|(res5.*)|(bn5.*)|(mrcnn\_.*)|(rpn\_.*)|(fpn\_.*)",
+            "4+": r"(res4.*)|(bn4.*)|(res5.*)|(bn5.*)|(mrcnn\_.*)|(rpn\_.*)|(fpn\_.*)",
+            "5+": r"(res5.*)|(bn5.*)|(mrcnn\_.*)|(rpn\_.*)|(fpn\_.*)",
+            # All layers
+            "all": ".*",
+        }
+        if layers in layer_regex.keys():
+            layers = layer_regex[layers]
+
+        # Data generators
+        train_generator = modellib.data_generator(train_dataset, self.config, shuffle=True,
+                                                  augmentation=augmentation,
+                                                  batch_size=self.config.BATCH_SIZE,
+                                                  no_augmentation_sources=no_augmentation_sources)
+        val_generator = modellib.data_generator(val_dataset, self.config, shuffle=True,
+                                                batch_size=self.config.BATCH_SIZE)
+
+        # Create log_dir if it does not exist
+        if not os.path.exists(self.log_dir):
+            os.makedirs(self.log_dir)
+
+        # Callbacks
+        callbacks = [
+            keras.callbacks.TensorBoard(log_dir=self.log_dir,
+                                        histogram_freq=0, write_graph=True, write_images=False),
+            keras.callbacks.ModelCheckpoint(self.checkpoint_path,
+                                            verbose=0, save_weights_only=True),
+        ]
+
+        # Add custom callbacks to the list
+        if custom_callbacks:
+            callbacks += custom_callbacks
+
+        # Train
+        modellib.log("\nStarting at epoch {}. LR={}\n".format(self.epoch, learning_rate))
+        modellib.log("Checkpoint Path: {}".format(self.checkpoint_path))
+        self.set_trainable(layers)
+        self.compile(learning_rate, self.config.LEARNING_MOMENTUM)
+
+        # Work-around for Windows: Keras fails on Windows when using
+        # multiprocessing workers. See discussion here:
+        # https://github.com/matterport/Mask_RCNN/issues/13#issuecomment-353124009
+        if os.name is 'nt':
+            workers = 0
+        else:
+            workers = modellib.multiprocessing.cpu_count()
+
+        self.history = self.keras_model.fit_generator(
+            train_generator,
+            initial_epoch=self.epoch,
+            epochs=epochs,
+            steps_per_epoch=self.config.STEPS_PER_EPOCH,
+            callbacks=callbacks,
+            validation_data=val_generator,
+            validation_steps=self.config.VALIDATION_STEPS,
+            max_queue_size=100,
+            workers=workers,
+            use_multiprocessing=True,
+        )
+        self.epoch = max(self.epoch, epochs)
 
 
 class OptimizeHyperparametersConfig(Config):
@@ -402,7 +474,7 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
 
         print("Training network heads of", index)
 
-        history = keras.callbacks.CallbackList().callbacks
+        history = model_hpo.history
         model_hpo.train(dataset_train, dataset_val,
                         learning_rate=config.LEARNING_RATE,
                         epochs=epochs,
@@ -419,8 +491,8 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
         print("Training", model_hpo.config.NAME, "Successful\n********************************************************"
               , "\n", "The total loss was:", loss)
 
-        model_hpo = modellib.MaskRCNN(mode="training", config=config_hpo,
-                                      model_dir=log_path)
+        model_hpo = MaskRCNN(mode="training", config=config_hpo,
+                             model_dir=log_path)
 
         print("Now training", model_hpo.config.NAME, "\n\n")
 
@@ -757,8 +829,8 @@ if __name__ == '__main__':
         model = modellib.MaskRCNN(mode="training", config=config,
                                   model_dir=args.logs)
     elif args.command == "optimizeHP":
-        model = modellib.MaskRCNN(mode="training", config=config,
-                                       model_dir=args.logs)
+        model = MaskRCNN(mode="training", config=config,
+                         model_dir=args.logs)
     else:
         model = modellib.MaskRCNN(mode="inference", config=config,
                                   model_dir=args.logs)
