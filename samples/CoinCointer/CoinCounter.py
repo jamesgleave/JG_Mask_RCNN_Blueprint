@@ -402,7 +402,7 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
 
         print("Training network heads of", index)
 
-        history = keras.callbacks.CallbackList()
+        history = keras.callbacks.CallbackList().callbacks
         model_hpo.train(dataset_train, dataset_val,
                         learning_rate=config.LEARNING_RATE,
                         epochs=epochs,
