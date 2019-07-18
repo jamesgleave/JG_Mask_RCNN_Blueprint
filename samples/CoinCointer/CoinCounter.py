@@ -399,11 +399,7 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
                         epochs=epochs,
                         layers='heads')
 
-        print(model_hpo.config.LOSS_WEIGHTS)
-        print(eval(model_hpo.keras_model.losses[0]))
-
-        x = 5/0
-        loss = 0
+        loss = model_hpo.model_loss
         loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
         config_list.append(loss_config_name)
 
