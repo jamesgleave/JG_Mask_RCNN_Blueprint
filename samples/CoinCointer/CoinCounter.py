@@ -3,7 +3,7 @@ import sys
 import json
 import datetime
 import numpy as np
-import tensorflow as tf
+import keras.callbacks as callback
 import skimage.draw
 import skimage.color
 import skimage.io
@@ -14,10 +14,9 @@ print("OS.name:", os.name)
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../../")
 print("Root dir:", ROOT_DIR)
-
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)  # To find local version of the library
-print("Found local version of the library\n")
+print("Found local version of the library\n", ROOT_DIR)
 
 print("Importing...\n")
 print("Importing tensorflow client...")
@@ -32,6 +31,7 @@ print("Successfully imported mrcnn model...")
 print("Importing mrcnn visualize")
 # from mrcnn import visualize
 print("Successfully imported mrcnn visualize...")
+
 
 
 # Path to trained weights file
@@ -311,6 +311,7 @@ class CoinDataset(utils.Dataset):
         self.add_class("Coin", 5, "loonie")
         self.add_class("Coin", 6, "toonie")
 
+
 # *************************************************************** #
 # Hyperparameter Optimization                                     #
 # *************************************************************** #
@@ -348,12 +349,30 @@ class OptimizeHyperparametersConfig(Config):
         self.WEIGHT_DECAY = np.random.uniform(wd_min, wd_max)
 
 
+class OptimizedModelSubclass(modellib.MaskRCNN):
+
+    def __init__(self, config, mode, model_dir):
+        super().__init__(config=config, mode=mode, model_dir=model_dir)
+        print("made instance")
+        self.model_loss = 0
+
+    def get_loss(self):
+        print(callback.K.eval(self.keras_model.losses))
+        self.model_loss = callback.K.eval(self.keras_model.losses)
+
+    # Added by JG_Mask_RCNN_Blueprint fork
+    # This is for the implementation of hyperparameter optimization
+    # This instance variable allows access to the loss of a model
+
+
 def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
     """Giving a range of values, this function uses random search to approximate the optimal
         hyperparameters for a giving RCNN. The benchmark model is the initial config.
         Therefor; the first model tested will be using the hyperparameters specified
         by the user. The epochs and steps, however; will be normalized.
     """
+
+    print(benchmark_model.model_loss)
 
     config_list = []
 
@@ -682,24 +701,9 @@ def inference(path, model_inf):
 #  Training
 ############################################################
 
-def debug(logs):
-    config = CoinConfig()
-    model = modellib.MaskRCNN(mode="training", config=config,
-                              model_dir=logs)
-    print(logs)
-    print(model.model_loss)
-
-    weights_path = COCO_WEIGHTS_PATH
-    model.load_weights(weights_path, by_name=True, exclude=[
-        "mrcnn_class_logits", "mrcnn_bbox_fc",
-        "mrcnn_bbox", "mrcnn_mask"])
-
-    optimize_hyperparameters(benchmark_model=model)
-
 
 if __name__ == '__main__':
     import argparse
-
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         description='Train Mask R-CNN to detect coins.')
@@ -765,8 +769,9 @@ if __name__ == '__main__':
         model = modellib.MaskRCNN(mode="training", config=config,
                                   model_dir=args.logs)
     elif args.command == "optimizeHP":
-        model = modellib.MaskRCNN(mode="training", config=config,
-                                  model_dir=args.logs)
+        print("making model")
+        model = OptimizedModelSubclass(mode="training", config=config,
+                                       model_dir=args.logs)
     else:
         model = modellib.MaskRCNN(mode="inference", config=config,
                                   model_dir=args.logs)

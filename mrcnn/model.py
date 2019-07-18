@@ -1836,18 +1836,12 @@ class MaskRCNN():
         self.set_log_dir()
         self.keras_model = self.build(mode=mode, config=config)
 
-        # Added by JG_Mask_RCNN_Blueprint fork
-        # This is for the implementation of hyperparameter optimization
-        # This instance variable allows access to the loss of a model
-        self.model_loss = 0
-
     def build(self, mode, config):
         """Build Mask R-CNN architecture.
             input_shape: The shape of the input image.
             mode: Either "training" or "inference". The inputs and
                 outputs of the model differ accordingly.
         """
-        print("building james")
         assert mode in ['training', 'inference']
 
         # Image size must be dividable by 2 multiple times
@@ -2023,9 +2017,6 @@ class MaskRCNN():
                 [target_bbox, target_class_ids, mrcnn_bbox])
             mask_loss = KL.Lambda(lambda x: mrcnn_mask_loss_graph(*x), name="mrcnn_mask_loss")(
                 [target_mask, target_class_ids, mrcnn_mask])
-
-            # Adds up the loss for collection
-            self.model_loss = rpn_class_loss + rpn_bbox_loss + class_loss + bbox_loss + mask_loss
 
             # Model
             inputs = [input_image, input_image_meta,
