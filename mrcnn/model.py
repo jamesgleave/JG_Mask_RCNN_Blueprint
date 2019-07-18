@@ -1839,7 +1839,7 @@ class MaskRCNN():
         # Added by JG_Mask_RCNN_Blueprint fork
         # This is for the implementation of hyperparameter optimization
         # This instance variable allows access to the loss of a model
-        self.model_loss = 0
+        self.model_loss = 25
 
     def get_model_loss(self):
         return self.model_loss

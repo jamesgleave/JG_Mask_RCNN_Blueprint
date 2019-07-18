@@ -371,6 +371,7 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
     benchmark_model.config.STEPS_PER_EPOCH = config_hpo.STEPS_PER_EPOCH
     benchmark_model.config.NAME = "Benchmark"
 
+    print(benchmark_model.model_loss)
     model_hpo = benchmark_model
 
     for index in range(num_of_cylces):
