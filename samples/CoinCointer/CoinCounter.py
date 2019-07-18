@@ -356,7 +356,7 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
         by the user. The epochs and steps, however; will be normalized.
     """
 
-    history = keras.callbacks.History()
+    history = keras.callbacks.History().history
     config_list = []
 
     log_path = benchmark_model.model_dir
