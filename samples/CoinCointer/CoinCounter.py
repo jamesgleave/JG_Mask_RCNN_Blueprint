@@ -397,8 +397,8 @@ class OptimizeHyperparametersConfig(Config):
 
     """Creates a config for the process of hyperparameter optimization"""
 
-    STEPS_PER_EPOCH = 2
-    VALIDATION_STEPS = 1
+    STEPS_PER_EPOCH = 100
+    VALIDATION_STEPS = 50
 
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
@@ -425,7 +425,7 @@ class OptimizeHyperparametersConfig(Config):
         self.WEIGHT_DECAY = np.random.uniform(wd_min, wd_max)
 
 
-def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
+def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=5):
     """Giving a range of values, this function uses random search to approximate the optimal
         hyperparameters for a giving RCNN. The benchmark model is the initial config.
         Therefor; the first model tested will be using the hyperparameters specified
@@ -480,7 +480,7 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
                         layers='heads')
 
         history = model_hpo.history
-        loss = history.history
+        loss = history.history['loss']
         loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
         config_list.append(loss_config_name)
 
