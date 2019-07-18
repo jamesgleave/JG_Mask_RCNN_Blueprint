@@ -378,8 +378,6 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
 
     model_hpo = benchmark_model
 
-    print("\n\n\n\n", benchmark_model.model_loss)
-
     for index in range(num_of_cylces):
 
         """Train the model."""
