@@ -348,7 +348,7 @@ class OptimizeHyperparametersConfig(Config):
         self.WEIGHT_DECAY = np.random.uniform(wd_min, wd_max)
 
 
-def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs=1):
+def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
     """Giving a range of values, this function uses random search to approximate the optimal
         hyperparameters for a giving RCNN. The benchmark model is the initial config.
         Therefor; the first model tested will be using the hyperparameters specified
@@ -356,6 +356,8 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
     """
 
     config_list = []
+
+    log_path = benchmark_model.model_dir
 
     learning_rate_range = [0.0005, 0.002]
     learning_momentum_range = [0.5, 0.99]
@@ -371,8 +373,9 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
     benchmark_model.config.STEPS_PER_EPOCH = config_hpo.STEPS_PER_EPOCH
     benchmark_model.config.NAME = "Benchmark"
 
-    print(benchmark_model.get_model_loss())
     model_hpo = benchmark_model
+
+    print("\n\n\n\n", benchmark_model.model_loss)
 
     for index in range(num_of_cylces):
 
@@ -679,6 +682,20 @@ def inference(path, model_inf):
 #  Training
 ############################################################
 
+def debug(logs):
+    config = CoinConfig()
+    model = modellib.MaskRCNN(mode="training", config=config,
+                              model_dir=logs)
+    print(logs)
+    print(model.model_loss)
+
+    weights_path = COCO_WEIGHTS_PATH
+    model.load_weights(weights_path, by_name=True, exclude=[
+        "mrcnn_class_logits", "mrcnn_bbox_fc",
+        "mrcnn_bbox", "mrcnn_mask"])
+
+    optimize_hyperparameters(benchmark_model=model)
+
 
 if __name__ == '__main__':
     import argparse
@@ -710,6 +727,7 @@ if __name__ == '__main__':
                         help='Video to apply the color splash effect on')
 
     args = parser.parse_args()
+    print("args has been created")
 
     # Validate arguments
     if args.command == "train":
@@ -728,8 +746,10 @@ if __name__ == '__main__':
     print("Dataset: ", args.dataset)
     print("Logs: ", args.logs)
 
+    print("commands validated")
+
     # Configurations
-    if args.command == "train":
+    if args.command == "train" or args.command == "optimizeHP":
         config = CoinConfig()
     else:
         class InferenceConfig(CoinConfig):
@@ -789,7 +809,7 @@ if __name__ == '__main__':
     elif args.command == "inference":
         inference(model_inf=model, path=args.image)
     elif args.command == "optimizeHP":
-        optimize_hyperparameters(log_path=args.logs, benchmark_model=model)
+        optimize_hyperparameters(benchmark_model=model)
     else:
         print("'{}' is not recognized. "
               "Use 'train' or 'splash'".format(args.command))
