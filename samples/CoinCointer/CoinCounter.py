@@ -371,7 +371,7 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
     benchmark_model.config.STEPS_PER_EPOCH = config_hpo.STEPS_PER_EPOCH
     benchmark_model.config.NAME = "Benchmark"
 
-    model_hpo = benchmark_model
+    model_hpo = benchmark_model.model_loss
 
     for index in range(num_of_cylces):
 
@@ -399,7 +399,7 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
                         epochs=epochs,
                         layers='heads')
 
-        loss = model_hpo.model_loss
+        loss = model_hpo.get_model_loss()
         loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
         config_list.append(loss_config_name)
 
@@ -481,7 +481,7 @@ def color_splash(image, mask):
 
 
 def remove_background(image, mask):
-    """Blacks out all objects that are not balloons.
+    """Blacks out all objects that are not masked.
     image: RGB image [height, width, 3]
     mask: instance segmentation mask [height, width, instance count]
 
@@ -498,11 +498,11 @@ def remove_background(image, mask):
     if mask.shape[-1] > 0:
         # We're treating all instances as one, so collapse the mask into one layer
         mask = (np.sum(mask, -1, keepdims=True) >= 1)
-        splash = np.where(mask, image, blackout).astype(np.uint8)
+        augmented_image = np.where(mask, image, blackout).astype(np.uint8)
     else:
-        splash = blackout.astype(np.uint8)
+        augmented_image = blackout.astype(np.uint8)
 
-    return splash
+    return augmented_image
 
 
 def detect_and_color_splash(model, image_path=None, video_path=None):
@@ -667,6 +667,9 @@ if __name__ == '__main__':
     elif args.command == "inference":
         assert args.image,\
                "Provide --image=(image path) or (directory path)"
+    elif args.command == "removeBG":
+        assert args.image,\
+               "Provide --image=(image path)"
 
     print("Weights: ", args.weights)
     print("Dataset: ", args.dataset)
@@ -721,10 +724,13 @@ if __name__ == '__main__':
     else:
         model.load_weights(weights_path, by_name=True)
 
-    # Train or evaluate
+    # Train, evaluate, or optimize hyperparameters
     if args.command == "train":
         train(model)
     elif args.command == "splash":
+        detect_and_color_splash(model, image_path=args.image,
+                                video_path=args.video)
+    elif args.command == "removeBG":
         detect_and_color_splash(model, image_path=args.image,
                                 video_path=args.video)
     elif args.command == "inference":

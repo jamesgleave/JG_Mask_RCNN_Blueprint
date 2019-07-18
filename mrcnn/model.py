@@ -1841,6 +1841,9 @@ class MaskRCNN():
         # This instance variable allows access to the loss of a model
         self.model_loss = 0
 
+    def get_model_loss(self):
+        return self.model_loss
+
     def build(self, mode, config):
         """Build Mask R-CNN architecture.
             input_shape: The shape of the input image.
