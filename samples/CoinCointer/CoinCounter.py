@@ -371,7 +371,7 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
     benchmark_model.config.STEPS_PER_EPOCH = config_hpo.STEPS_PER_EPOCH
     benchmark_model.config.NAME = "Benchmark"
 
-    model_hpo = benchmark_model.model_loss
+    model_hpo = benchmark_model
 
     for index in range(num_of_cylces):
 
@@ -406,7 +406,7 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         config_hpo.set_params(hyperparameter_dict, index)
 
         print("Training", model_hpo.config.NAME, "Successful\n********************************************************"
-              , "\n", "The total loss was:", model_hpo.model_loss)
+              , "\n", "The total loss was:", loss)
 
         model_hpo = modellib.MaskRCNN(mode="training", config=config_hpo,
                                       model_dir=log_path)
@@ -552,6 +552,58 @@ def detect_and_color_splash(model, image_path=None, video_path=None):
                 splash = splash[..., ::-1]
                 # Add image to video writer
                 vwriter.write(splash)
+                count += 1
+        vwriter.release()
+    print("Saved to ", file_name)
+
+
+def detect_and_remove_background(model, image_path=None, video_path=None):
+    assert image_path or video_path
+
+    # Image or video?
+    if image_path:
+        # Run model detection and generate the color splash effect
+        print("Running on {}".format(args.image))
+        # Read image
+        image = skimage.io.imread(args.image)
+        # Detect objects
+        r = model.detect([image], verbose=1)[0]
+        # Color splash
+        augmented_image = remove_background(image, r['masks'])
+        # Save output
+        file_name = "augmented_image_{:%Y%m%dT%H%M%S}.png".format(datetime.datetime.now())
+        skimage.io.imsave(file_name, augmented_image)
+    elif video_path:
+        import cv2
+        # Video capture
+        vcapture = cv2.VideoCapture(video_path)
+        width = int(vcapture.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(vcapture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = vcapture.get(cv2.CAP_PROP_FPS)
+
+        # Define codec and create video writer
+        file_name = "splash_{:%Y%m%dT%H%M%S}.avi".format(datetime.datetime.now())
+        vwriter = cv2.VideoWriter(file_name,
+                                  cv2.VideoWriter_fourcc(*'MJPG'),
+                                  fps, (width, height))
+
+        count = 0
+        success = True
+        while success:
+            print("frame: ", count)
+            # Read next image
+            success, image = vcapture.read()
+            if success:
+                # OpenCV returns images as BGR, convert to RGB
+                image = image[..., ::-1]
+                # Detect objects
+                r = model.detect([image], verbose=0)[0]
+                # Color splash
+                augmented_image = remove_background(image, r['masks'])
+                # RGB -> BGR to save image to video
+                augmented_image = augmented_image[..., ::-1]
+                # Add image to video writer
+                vwriter.write(augmented_image)
                 count += 1
         vwriter.release()
     print("Saved to ", file_name)
@@ -731,8 +783,8 @@ if __name__ == '__main__':
         detect_and_color_splash(model, image_path=args.image,
                                 video_path=args.video)
     elif args.command == "removeBG":
-        detect_and_color_splash(model, image_path=args.image,
-                                video_path=args.video)
+        detect_and_remove_background(model, image_path=args.image,
+                                     video_path=args.video)
     elif args.command == "inference":
         inference(model_inf=model, path=args.image)
     elif args.command == "optimizeHP":
