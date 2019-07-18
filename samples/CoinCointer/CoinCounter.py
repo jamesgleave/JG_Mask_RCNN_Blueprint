@@ -403,6 +403,7 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
                         epochs=epochs,
                         layers='heads',
                         custom_callbacks=history)
+        print(history)
 
         loss = history
         loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
