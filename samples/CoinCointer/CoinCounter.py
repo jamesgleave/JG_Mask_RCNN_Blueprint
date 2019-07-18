@@ -405,8 +405,13 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
 
         config_hpo.set_params(hyperparameter_dict, index)
 
+        print("Training", model_hpo.config.NAME, "Successful\n********************************************************"
+              , "\n", "The total loss was:", model_hpo.model_loss)
+
         model_hpo = modellib.MaskRCNN(mode="training", config=config_hpo,
                                       model_dir=log_path)
+
+        print("Now training", model_hpo.config.NAME, "\n\n")
 
     opt_hyperparameters = config_list[0]
     for c in config_list:
