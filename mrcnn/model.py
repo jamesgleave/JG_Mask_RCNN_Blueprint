@@ -1836,7 +1836,7 @@ class MaskRCNN():
 
         assert mode in ['training', 'inference']
         self.mode = mode
-        self.model_loss = model_dir
+        self.model_loss = 0
         self.config = config
         self.model_dir = model_dir
         self.set_log_dir()
