@@ -357,6 +357,7 @@ class OptimizedModelSubclass(modellib.MaskRCNN):
         self.model_loss = 0
 
     def get_loss(self):
+        print(callback.History)
         print(callback.K.eval(self.keras_model.losses))
         self.model_loss = callback.K.eval(self.keras_model.losses)
 
@@ -372,7 +373,7 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
         by the user. The epochs and steps, however; will be normalized.
     """
 
-    print(benchmark_model.model_loss)
+    history = callback
 
     config_list = []
 
@@ -420,9 +421,10 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=1):
         model_hpo.train(dataset_train, dataset_val,
                         learning_rate=config.LEARNING_RATE,
                         epochs=epochs,
-                        layers='heads')
+                        layers='heads',
+                        custom_callbacks=history)
 
-        loss = model_hpo.get_model_loss()
+        loss = history
         loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
         config_list.append(loss_config_name)
 
