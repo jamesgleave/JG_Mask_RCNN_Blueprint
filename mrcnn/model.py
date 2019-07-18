@@ -1829,17 +1829,18 @@ class MaskRCNN():
         config: A Sub-class of the Config class
         model_dir: Directory to save training logs and trained weights
         """
+
+        # model_loss was added by JG_Mask_RCNN_Blueprint fork
+        # This is for the implementation of hyperparameter optimization
+        # This instance variable allows access to the loss of a model
+
         assert mode in ['training', 'inference']
         self.mode = mode
+        self.model_loss = model_dir
         self.config = config
         self.model_dir = model_dir
         self.set_log_dir()
         self.keras_model = self.build(mode=mode, config=config)
-
-        # Added by JG_Mask_RCNN_Blueprint fork
-        # This is for the implementation of hyperparameter optimization
-        # This instance variable allows access to the loss of a model
-        self.model_loss = 25
 
     def get_model_loss(self):
         return self.model_loss
