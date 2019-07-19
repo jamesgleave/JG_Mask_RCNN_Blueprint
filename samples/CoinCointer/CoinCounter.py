@@ -3,8 +3,6 @@ os.environ['MKL_NUM_THREADS'] = '16'
 os.environ['GOTO_NUM_THREADS'] = '16'
 os.environ['OMP_NUM_THREADS'] = '16'
 os.environ['openmp'] = 'True'
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
 import sys
 import json
 import datetime
@@ -765,7 +763,7 @@ if __name__ == '__main__':
     import argparse
     import tensorflow as tf
 
-    config = tf.ConfigProto(device_count={'XLA_CPU': 8})
+    config = tf.ConfigProto(device_count={'XLA_CPU': 0, 'CPU': 0})
     sess = tf.Session(config=config)
     tf.keras.backend.set_session(session=sess)
     print("The available devices are", get_available_devices())
