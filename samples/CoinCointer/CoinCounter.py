@@ -1,4 +1,9 @@
 import os
+os.environ["OMP_NUM_THREADS"] = "8"
+os.environ['CUDA_VISIBLE_DEVICES'] = ""
+os.environ["KMP_BLOCKTIME"] = "30"
+os.environ["KMP_SETTINGS"] = "1"
+os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 import sys
 import json
 import datetime
@@ -94,8 +99,7 @@ class CoinConfig(Config):
 
 def get_available_devices():
     local_device_protos = device_lib.list_local_devices()
-    num_of_cpu = os.environ['CUDA_VISIBLE_DEVICES']
-    return [[x.name for x in local_device_protos], num_of_cpu]
+    return [[x.name for x in local_device_protos]]
 
 ############################################################
 #  Data-set
@@ -771,12 +775,6 @@ if __name__ == '__main__':
 
     session = tf.Session(config=config)
     K.set_session(session)
-
-    os.environ["OMP_NUM_THREADS"] = "8"
-    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-    # os.environ["KMP_BLOCKTIME"] = "30"
-    # os.environ["KMP_SETTINGS"] = "1"
-    # os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
