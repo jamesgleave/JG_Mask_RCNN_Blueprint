@@ -3,6 +3,8 @@ os.environ['MKL_NUM_THREADS'] = '16'
 os.environ['GOTO_NUM_THREADS'] = '16'
 os.environ['OMP_NUM_THREADS'] = '16'
 os.environ['openmp'] = 'True'
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 import sys
 import json
 import datetime
