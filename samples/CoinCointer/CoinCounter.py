@@ -6,6 +6,8 @@ os.environ['openmp'] = 'True'
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 os.environ['XLA_FLAGS'] = '--xla_hlo_profile'
+os.environ["TF_XLA_FLAGS"] = ("--tf_xla_enable_lazy_compilation=true " +
+                                os.environ.get("TF_XLA_FLAGS", ""))
 
 import sys
 import json
