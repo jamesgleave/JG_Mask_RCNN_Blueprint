@@ -61,6 +61,7 @@ os.environ["KMP_BLOCKTIME"] = "30"
 os.environ["KMP_SETTINGS"] = "1"
 os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 
+K.get_session().as_default()
 # *********************************************************************************************************** #
 #                                 HOW TO TRAIN THE MODEL WITH COCO WEIGHTS                                    #
 # python3 samples/CoinCointer/CoinCounter.py train --dataset=datasets/coin/ --weights=coco --logs=logs/CoinCounterLogs
@@ -446,9 +447,6 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=5):
     """
 
     config_list = []
-
-    print("values of the benchmark model:", benchmark_model.keras_model.get_config())
-    print("Keys of benchmark model:", benchmark_model.keras_model.get_config().keys())
 
     log_path = benchmark_model.model_dir
 
