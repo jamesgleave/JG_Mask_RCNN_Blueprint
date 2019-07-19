@@ -759,7 +759,7 @@ if __name__ == '__main__':
     import argparse
 
     print("The available devices are", get_available_devices())
-    os.environ['OMP_NUM_THREADS'] = '1'
+    os.environ['OMP_NUM_THREADS'] = '4'
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
