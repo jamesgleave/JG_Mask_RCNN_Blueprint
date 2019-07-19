@@ -63,9 +63,8 @@ os.environ["OMP_NUM_THREADS"] = "4"
 os.environ["KMP_BLOCKTIME"] = "30"
 os.environ["KMP_SETTINGS"] = "1"
 os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
-os.environ["TF_XLA_FLAGS"] = "tf_xla_cpu_global_jit"
-
-K.get_session().as_default()
+os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
+os.environ["XLA_FLAGS"] = "--xla_hlo_profile"
 # *********************************************************************************************************** #
 #                                 HOW TO TRAIN THE MODEL WITH COCO WEIGHTS                                    #
 # python3 samples/CoinCointer/CoinCounter.py train --dataset=datasets/coin/ --weights=coco --logs=logs/CoinCounterLogs
