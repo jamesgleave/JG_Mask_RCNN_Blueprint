@@ -763,7 +763,10 @@ def inference(path, model_inf):
 
 if __name__ == '__main__':
     import argparse
+    import tensorflow as tf
 
+    config = tf.ConfigProto(device_count={'XLA_CPU': 8})
+    sess = tf.Session(config=config)
     print("The available devices are", get_available_devices())
 
     # Parse command line arguments
