@@ -63,6 +63,7 @@ os.environ["OMP_NUM_THREADS"] = "4"
 os.environ["KMP_BLOCKTIME"] = "30"
 os.environ["KMP_SETTINGS"] = "1"
 os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
+os.environ["TF_XLA_FLAGS"] = "tf_xla_cpu_global_jit"
 
 K.get_session().as_default()
 # *********************************************************************************************************** #
