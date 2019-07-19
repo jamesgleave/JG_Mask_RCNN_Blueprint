@@ -763,10 +763,11 @@ if __name__ == '__main__':
     import argparse
     import tensorflow as tf
 
+    print("The available devices are", get_available_devices())
+
     config = tf.ConfigProto(device_count={'XLA_CPU': 0, 'CPU': 0})
     sess = tf.Session(config=config)
     tf.keras.backend.set_session(session=sess)
-    print("The available devices are", get_available_devices())
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
