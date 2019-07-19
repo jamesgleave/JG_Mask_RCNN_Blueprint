@@ -9,8 +9,6 @@ import skimage.color
 import skimage.io
 import glob
 
-print("OS.name:", os.name)
-
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../../")
 print("Root dir:", ROOT_DIR)
@@ -31,7 +29,6 @@ print("Successfully imported mrcnn model...")
 print("Importing mrcnn visualize")
 # from mrcnn import visualize
 print("Successfully imported mrcnn visualize...")
-
 
 
 # Path to trained weights file
@@ -288,9 +285,7 @@ class CoinDataset(utils.Dataset):
 
     def get_class_names(self):
         class_name_list = []
-        print("Classes:")
         for obj in self.class_info:
-            print("- ", obj["name"])
             name = obj["name"]
             class_name_list.append(name)
 
@@ -494,9 +489,9 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=5):
         loss, con, name = c
         if loss < opt_hyperparameters[0]:
             opt_hyperparameters = c
-    print("The optimal hyperparameters are approximately", opt_hyperparameters[2])
+    print("The optimal hyperparameters are approximately", opt_hyperparameters[1])
     print("With a loss of", opt_hyperparameters[0])
-    print("The config was", opt_hyperparameters[3])
+    print("The config was", opt_hyperparameters[2])
 
 
 # *************************************************************** #
@@ -788,7 +783,6 @@ if __name__ == '__main__':
                         help='Video to apply the color splash effect on')
 
     args = parser.parse_args()
-    print("args has been created")
 
     # Validate arguments
     if args.command == "train":
@@ -806,8 +800,6 @@ if __name__ == '__main__':
     print("Weights: ", args.weights)
     print("Dataset: ", args.dataset)
     print("Logs: ", args.logs)
-
-    print("commands validated")
 
     # Configurations
     if args.command == "train" or args.command == "optimizeHP":
