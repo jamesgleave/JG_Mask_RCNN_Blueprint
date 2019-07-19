@@ -477,7 +477,7 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=10, epochs=1):
         config_hpo.set_params(hyperparameter_dict, index)
 
         print("Training", model_hpo.config.NAME, "Successful\n********************************************************"
-              , "\n", "The total loss was:", loss)
+              , "\nThe total loss was:", loss)
 
         model_hpo = MaskRCNN(mode="training", config=config_hpo,
                              model_dir=log_path)
@@ -487,6 +487,7 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=10, epochs=1):
     opt_hyperparameters = config_list[0]
     for c in config_list:
         loss, con, name = c
+        print("Name:", name, "\nLoss:", loss, "\nConfig:", con, "\n***********************************************\n\n")
         if loss < opt_hyperparameters[0]:
             opt_hyperparameters = c
     print("The optimal hyperparameters are approximately", opt_hyperparameters[1])
