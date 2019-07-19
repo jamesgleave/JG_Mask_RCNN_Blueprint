@@ -1,14 +1,4 @@
 import os
-os.environ['MKL_NUM_THREADS'] = '16'
-os.environ['GOTO_NUM_THREADS'] = '16'
-os.environ['OMP_NUM_THREADS'] = '16'
-os.environ['openmp'] = 'True'
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-os.environ['XLA_FLAGS'] = '--xla_hlo_profile'
-os.environ["TF_XLA_FLAGS"] = ("--tf_xla_enable_lazy_compilation=true " +
-                                os.environ.get("TF_XLA_FLAGS", ""))
-
 import sys
 import json
 import datetime
@@ -767,15 +757,6 @@ def inference(path, model_inf):
 
 if __name__ == '__main__':
     import argparse
-    import tensorflow as tf
-
-    print("The available devices are", get_available_devices())
-
-    config = tf.ConfigProto(device_count={'XLA_CPU': 0})
-    config.graph_options.optimizer_options.global_jit_level = tf.OptimizerOptions.ON_1
-
-    sess = tf.Session(config=config)
-    tf.keras.backend.set_session(session=sess)
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
