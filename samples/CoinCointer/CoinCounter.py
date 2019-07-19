@@ -1,9 +1,9 @@
 import os
 os.environ["OMP_NUM_THREADS"] = "8"
 os.environ['CUDA_VISIBLE_DEVICES'] = ""
-os.environ["KMP_BLOCKTIME"] = "30"
-os.environ["KMP_SETTINGS"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
+# os.environ["KMP_BLOCKTIME"] = "30"
+# os.environ["KMP_SETTINGS"] = "1"
+# os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 import sys
 import json
 import datetime
