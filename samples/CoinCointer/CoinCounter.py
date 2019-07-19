@@ -758,6 +758,9 @@ def inference(path, model_inf):
 if __name__ == '__main__':
     import argparse
 
+    print("The available devices are", get_available_devices())
+    os.environ['OMP_NUM_THREADS'] = '1'
+
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         description='Train Mask R-CNN to detect coins.')
