@@ -768,7 +768,7 @@ if __name__ == '__main__':
     print("The available devices are", get_available_devices())
 
     config = tf.ConfigProto(device_count={'XLA_CPU': 0})
-    sess = tf.Session(config=config)
+    sess = tf.Session(config=config, )
     tf.keras.backend.set_session(session=sess)
 
     # Parse command line arguments
