@@ -94,11 +94,8 @@ class CoinConfig(Config):
 
 def get_available_devices():
     local_device_protos = device_lib.list_local_devices()
-    return [x.name for x in local_device_protos]
-
-
-print("The available devices are", get_available_devices())
-
+    num_of_cpu = os.environ['CUDA_VISIBLE_DEVICES']
+    return [[x.name for x in local_device_protos], num_of_cpu]
 
 ############################################################
 #  Data-set
@@ -763,6 +760,8 @@ if __name__ == '__main__':
     import argparse
     from keras import backend as K
     import tensorflow as tf
+
+    print("The available devices are", get_available_devices())
 
     NUM_PARALLEL_EXEC_UNITS = 8
     config = tf.ConfigProto(intra_op_parallelism_threads=NUM_PARALLEL_EXEC_UNITS, inter_op_parallelism_threads=4,
