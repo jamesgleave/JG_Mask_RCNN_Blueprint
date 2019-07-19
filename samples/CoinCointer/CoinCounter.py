@@ -1,4 +1,8 @@
 import os
+os.environ['MKL_NUM_THREADS'] = '16'
+os.environ['GOTO_NUM_THREADS'] = '16'
+os.environ['OMP_NUM_THREADS'] = '16'
+os.eviron['openmp'] = 'True'
 import sys
 import json
 import datetime
