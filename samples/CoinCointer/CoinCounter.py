@@ -5,6 +5,8 @@ os.environ['OMP_NUM_THREADS'] = '16'
 os.environ['openmp'] = 'True'
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+os.environ['XLA_FLAGS'] = '--xla_hlo_profile'
+
 import sys
 import json
 import datetime
@@ -767,7 +769,9 @@ if __name__ == '__main__':
 
     print("The available devices are", get_available_devices())
 
-    config = tf.ConfigProto(device_count={'XLA_CPU': 0}, XLA_FLAGS="--xla_hlo_profile")
+    config = tf.ConfigProto(device_count={'XLA_CPU': 0})
+    config.graph_options.optimizer_options.global_jit_level = tf.OptimizerOptions.ON_1
+
     sess = tf.Session(config=config)
     tf.keras.backend.set_session(session=sess)
 
