@@ -434,6 +434,9 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=30, epochs=5):
 
     config_list = []
 
+    print("values of the benchmark model:", benchmark_model.keras_model.get_config().values())
+    print("Keys of benchmark model:", benchmark_model.keras_model.get_config().keys())
+
     log_path = benchmark_model.model_dir
 
     learning_rate_range = [0.0005, 0.002]
