@@ -1,9 +1,4 @@
 import os
-os.environ["OMP_NUM_THREADS"] = "8"
-os.environ['CUDA_VISIBLE_DEVICES'] = ""
-# os.environ["KMP_BLOCKTIME"] = "30"
-# os.environ["KMP_SETTINGS"] = "1"
-# os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 import sys
 import json
 import datetime
@@ -762,16 +757,8 @@ def inference(path, model_inf):
 
 if __name__ == '__main__':
     import argparse
-    from keras import backend as K
-    import tensorflow as tf
 
     print("The available devices are", get_available_devices())
-
-    sess_config = tf.ConfigProto()
-    sess_config.intra_op_parallelism_threads = 2
-    sess_config.inter_op_parallelism_threads = 2
-    sess = tf.Session(config=sess_config)
-    K.set_session(sess)
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
