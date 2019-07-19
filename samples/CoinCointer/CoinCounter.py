@@ -50,7 +50,7 @@ print("default log path:", DEFAULT_LOGS_DIR)
 from keras import backend as K
 import tensorflow as tf
 
-NUM_PARALLEL_EXEC_UNITS = 4
+NUM_PARALLEL_EXEC_UNITS = 32
 config = tf.ConfigProto(intra_op_parallelism_threads=NUM_PARALLEL_EXEC_UNITS, inter_op_parallelism_threads=2,
                         allow_soft_placement=True, device_count={'CPU': NUM_PARALLEL_EXEC_UNITS})
 
@@ -59,12 +59,11 @@ config.graph_options.optimizer_options.global_jit_level = tf.OptimizerOptions.ON
 session = tf.Session(config=config)
 K.set_session(session)
 
-os.environ["OMP_NUM_THREADS"] = "4"
+os.environ["OMP_NUM_THREADS"] = "32"
 os.environ["KMP_BLOCKTIME"] = "30"
 os.environ["KMP_SETTINGS"] = "1"
 os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
-os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
-os.environ["XLA_FLAGS"] = "--xla_hlo_profile"
+
 # *********************************************************************************************************** #
 #                                 HOW TO TRAIN THE MODEL WITH COCO WEIGHTS                                    #
 # python3 samples/CoinCointer/CoinCounter.py train --dataset=datasets/coin/ --weights=coco --logs=logs/CoinCounterLogs
