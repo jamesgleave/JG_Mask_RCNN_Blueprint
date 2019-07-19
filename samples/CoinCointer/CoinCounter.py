@@ -1,9 +1,9 @@
 import os
 os.environ["OMP_NUM_THREADS"] = "8"
 os.environ['CUDA_VISIBLE_DEVICES'] = ""
-os.environ["KMP_BLOCKTIME"] = "30"
-os.environ["KMP_SETTINGS"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
+# os.environ["KMP_BLOCKTIME"] = "30"
+# os.environ["KMP_SETTINGS"] = "1"
+# os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 import sys
 import json
 import datetime
@@ -767,14 +767,11 @@ if __name__ == '__main__':
 
     print("The available devices are", get_available_devices())
 
-    NUM_PARALLEL_EXEC_UNITS = 8
-    config = tf.ConfigProto(intra_op_parallelism_threads=NUM_PARALLEL_EXEC_UNITS, inter_op_parallelism_threads=4,
-                            allow_soft_placement=True, device_count={'CPU': NUM_PARALLEL_EXEC_UNITS})
-
-    config.graph_options.optimizer_options.global_jit_level = tf.OptimizerOptions.ON_1
-
-    session = tf.Session(config=config)
-    K.set_session(session)
+    config = tf.ConfigProto()
+    config.intra_op_parallelism_threads = 8
+    config.inter_op_parallelism_threads = 8
+    sess = tf.Session(config=config)
+    K.set_session(sess)
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
