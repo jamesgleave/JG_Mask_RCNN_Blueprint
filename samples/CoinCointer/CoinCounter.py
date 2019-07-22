@@ -9,6 +9,8 @@ import skimage.color
 import skimage.io
 import glob
 
+# to do: build models prior to optimization
+
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../../")
 print("Root dir:", ROOT_DIR)
