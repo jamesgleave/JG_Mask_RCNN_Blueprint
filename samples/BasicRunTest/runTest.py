@@ -103,4 +103,5 @@ def defineImage(filePath):
                                     class_names, r['scores'])
 
 # Enter the path of an image here.
-defineImage("Path/To/Image/")
+if __name__ == '__main__':
+    defineImage("/Users/martingleave/Documents/GitHub/JG_Mask_RCNN/JG_Mask_RCNN_Blueprint/images/12283150_12d37e6389_z.jpg")

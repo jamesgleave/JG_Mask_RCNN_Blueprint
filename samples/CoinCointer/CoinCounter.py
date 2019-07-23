@@ -61,7 +61,7 @@ print("default log path:", DEFAULT_LOGS_DIR)
 
 # *********************************************************************************************************** #
 #                                      HOW TO RUN INFERENCE ON A TRAINED MODEL                                #
-# python3 samples/CoinCointer/CoinCounter.py inference --image=datasets/coin/val --weights=mask_rcnn_coin_0030.h5
+# python3 samples/CoinCointer/CoinCounter.py inference --image=datasets/coin/val --weights=JG_Mask_RCNN_Blueprint/logs/CoinCounterLogsTwo__LowerLR_and_LowerMMNTM/coin20190710T2036/mask_rcnn_coin_0030.h5
 # *********************************************************************************************************** #
 
 
@@ -428,8 +428,8 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=10, epochs=1):
 
     log_path = benchmark_model.model_dir
 
-    learning_rate_range = [0.0005, 0.002]
-    learning_momentum_range = [0.5, 0.99]
+    learning_rate_range = [0.0005, 0.0015]
+    learning_momentum_range = [0.7, 0.99]
     weight_decay_range = [0.00007, 0.00014]
 
     hyperparameter_dict = {"lr": learning_rate_range, "lm": learning_momentum_range, "wd": weight_decay_range}
