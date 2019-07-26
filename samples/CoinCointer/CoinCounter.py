@@ -40,6 +40,8 @@ print("the coco weights:", COCO_WEIGHTS_PATH)
 DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 print("default log path:", DEFAULT_LOGS_DIR)
 
+AVAILABLE_GPU_DEVICES = 1  # by default, this is updated by get_available_gpu()
+
 ############################################################
 #  Configurations
 ############################################################
@@ -71,9 +73,9 @@ class CoinConfig(Config):
 
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
-    IMAGES_PER_GPU = 1
+    IMAGES_PER_GPU = 2
 
-    GPU_COUNT = os.get
+    GPU_COUNT = AVAILABLE_GPU_DEVICES
 
     # Number of classes (including background)
     NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
@@ -96,7 +98,7 @@ def get_available_devices():
 
 def get_available_gpu():
     local_device_protos = device_lib.list_local_devices()
-    num_gpu = 0
+    num_gpu = 1
     for gpu in local_device_protos:
         if gpu.device_type == 'GPU':
             num_gpu += 1
@@ -829,6 +831,7 @@ if __name__ == '__main__':
 
     # Create model
     if args.command == "train":
+        AVAILABLE_GPU_DEVICES = get_available_gpu()
         model = modellib.MaskRCNN(mode="training", config=config,
                                   model_dir=args.logs)
     elif args.command == "optimizeHP":
