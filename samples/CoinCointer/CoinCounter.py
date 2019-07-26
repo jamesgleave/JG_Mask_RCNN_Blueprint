@@ -221,9 +221,10 @@ class CoinDataset(utils.Dataset):
         return mask.astype(np.bool), np.array(image_info['coinVariant'])
 
     # If there is an issue of with one or more photos in a dataset, this will ensure it does not crash the program
-    def debug_polygons(self, p, rr, cc, i, mask, info):
+    @staticmethod
+    def debug_polygons(p, rr, cc, i, mask, info):
         try:
-            mask[rr, cc]
+            is_this_possible = mask[rr, cc]
             return True
         except:
             if i == 0:
