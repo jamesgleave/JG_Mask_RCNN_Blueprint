@@ -73,6 +73,8 @@ class CoinConfig(Config):
     # Adjust down if you use a smaller GPU.
     IMAGES_PER_GPU = 1
 
+    GPU_COUNT = os.get
+
     # Number of classes (including background)
     NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
 
@@ -90,6 +92,16 @@ class CoinConfig(Config):
 def get_available_devices():
     local_device_protos = device_lib.list_local_devices()
     return [[x.name for x in local_device_protos]]
+
+
+def get_available_gpu():
+    local_device_protos = device_lib.list_local_devices()
+    num_gpu = 0
+    for gpu in local_device_protos:
+        if gpu.device_type == 'GPU':
+            num_gpu += 1
+
+    return num_gpu
 
 ############################################################
 #  Data-set
