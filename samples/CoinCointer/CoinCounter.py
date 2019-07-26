@@ -27,7 +27,7 @@ print("Importing mrcnn model")
 from mrcnn import model as modellib, utils
 print("Successfully imported mrcnn model...")
 print("Importing mrcnn visualize")
-# from mrcnn import visualize
+from mrcnn import visualize
 print("Successfully imported mrcnn visualize...")
 
 
@@ -48,8 +48,6 @@ print("default log path:", DEFAULT_LOGS_DIR)
 #                                 HOW TO TRAIN THE MODEL WITH COCO WEIGHTS                                    #
 # python3 samples/CoinCointer/CoinCounter.py train --dataset=datasets/coin/ --weights=coco --logs=logs/CoinCounterLogs
 # *********************************************************************************************************** #
-# /groups/hachgrp/projects/dev-image-segmentation/scripts/JG_Mask_RCNN_Blueprint/samples/CoinCointer/CoinCounter.py train --dataset=/groups/hachgrp/projects/dev-image-segmentation/scripts/JG_Mask_RCNN_Blueprint/datasets/coin/ --weights=coco --logs=/groups/hachgrp/projects/dev-image-segmentation/scripts/JG_Mask_RCNN_Blueprint/logs/CoinCounterLogs
-# # *********************************************************************************************************** #
 
 # *********************************************************************************************************** #
 #                                      HOW TO CONTINUE TRAINING THE MODEL                                     #
@@ -247,7 +245,8 @@ class CoinDataset(utils.Dataset):
             super(self.__class__, self).image_reference(image_id)
 
     # Checks which polygon was used in tagging the photo and returns the appropriate points
-    def check_shape_of_annotation(self, p=None):
+    @staticmethod
+    def check_shape_of_annotation(p=None):
         if p['name'] == 'polygon':
             rr, cc = skimage.draw.polygon(p['all_points_y'], p['all_points_x'])
         if p['name'] == 'polyline':
@@ -260,7 +259,8 @@ class CoinDataset(utils.Dataset):
         return rr, cc
 
     # Calculates the total value of the coins found in the photo
-    def calculate_total_value(self, coins):
+    @staticmethod
+    def calculate_total_value(coins):
         total_value = 0
 
         for coinCode in coins:
