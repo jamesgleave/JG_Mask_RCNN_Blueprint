@@ -73,7 +73,7 @@ class CoinConfig(Config):
 
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
-    IMAGES_PER_GPU = 3
+    IMAGES_PER_GPU = 2
 
     GPU_COUNT = 1
 
@@ -81,12 +81,7 @@ class CoinConfig(Config):
     NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
 
     # Number of training steps per epoch
-    STEPS_PER_EPOCH = 100
-
-    LEARNING_RATE = 0.0009
-    LEARNING_MOMENTUM = 0.9
-
-    DETECTION_MIN_CONFIDENCE = 0.7
+    STEPS_PER_EPOCH = 1000
 
     BACKBONE = "resnet101"
 
