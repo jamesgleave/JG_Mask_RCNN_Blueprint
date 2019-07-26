@@ -7,7 +7,6 @@ import skimage.draw
 import skimage.color
 import skimage.io
 import glob
-import skimage.transform as skit
 
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../../")
@@ -165,20 +164,12 @@ class BlueprintDataset(utils.Dataset):
         mask = np.zeros([info["height"], info["width"], len(info["polygons"])],
                         dtype=np.uint8)
 
-        # *************************************************************** #
-        #    IMPLEMENT A METHOD TO CHECK IF ANNOTATION IS OF ANY SHAPE    #
-        # *************************************************************** #
-
         for i, p in enumerate(info["polygons"]):
             # Get indexes of pixels inside the polygon and set them to 1
 
             rr, cc = self.check_shape_of_annotation(p)
             if self.debug_polygons(p, rr, cc, i, mask, info):
                 mask[rr, cc, i] = 1
-
-        # *************************************************************** #
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
-        # *************************************************************** #
 
         # Return mask, and array of class IDs of each instance. We have six
         # possible instances, so we give the class ID's the list of blueprint variants in each image
@@ -212,6 +203,7 @@ class BlueprintDataset(utils.Dataset):
 
     def check_shape_of_annotation(self, p=None):
         """Checks which polygon was used in tagging the photo and returns the appropriate points"""
+        rr, cc = None, None
         if p['name'] == 'polygon':
             rr, cc = skimage.draw.polygon(p['all_points_y'], p['all_points_x'])
         if p['name'] == 'polyline':
@@ -220,6 +212,9 @@ class BlueprintDataset(utils.Dataset):
             rr, cc = skimage.draw.circle(p['cy'], p['cx'], p['r'])
         if p['name'] == 'ellipse':
             rr, cc = skimage.draw.ellipse(p['cx'], p['cy'], r_radius=p['rx'], c_radius=p['ry'], rotation=p['theta'])
+
+        if rr is None:
+            print("The annotation shape was not recognized")
 
         return rr, cc
 
@@ -280,8 +275,8 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
 
     config_list = []
 
-    learning_rate_range = [0.0005, 0.002]
-    learning_momentum_range = [0.5, 0.99]
+    learning_rate_range = [0.0005, 0.0015]
+    learning_momentum_range = [0.81, 0.99]
     weight_decay_range = [0.00007, 0.00014]
 
     hyperparameter_dict = {"lr": learning_rate_range, "lm": learning_momentum_range, "wd": weight_decay_range}

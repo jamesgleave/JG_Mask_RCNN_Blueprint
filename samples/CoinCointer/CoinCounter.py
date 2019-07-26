@@ -436,8 +436,8 @@ def optimize_hyperparameters(benchmark_model, num_of_cylces=10, epochs=1):
 
     log_path = benchmark_model.model_dir
 
-    learning_rate_range = [0.0005, 0.002]
-    learning_momentum_range = [0.5, 0.99]
+    learning_rate_range = [0.0005, 0.0015]
+    learning_momentum_range = [0.81, 0.99]
     weight_decay_range = [0.00007, 0.00014]
 
     hyperparameter_dict = {"lr": learning_rate_range, "lm": learning_momentum_range, "wd": weight_decay_range}
