@@ -819,6 +819,8 @@ if __name__ == '__main__':
 
     # Configurations
     if args.command == "train" or args.command == "optimizeHP":
+        AVAILABLE_GPU_DEVICES = get_available_gpu()
+        print("GPU in use:", get_available_gpu())
         config = CoinConfig()
     else:
         class InferenceConfig(CoinConfig):
@@ -831,8 +833,6 @@ if __name__ == '__main__':
 
     # Create model
     if args.command == "train":
-        AVAILABLE_GPU_DEVICES = get_available_gpu()
-        print("GPU in use:", get_available_gpu())
         model = modellib.MaskRCNN(mode="training", config=config,
                                   model_dir=args.logs)
     elif args.command == "optimizeHP":
