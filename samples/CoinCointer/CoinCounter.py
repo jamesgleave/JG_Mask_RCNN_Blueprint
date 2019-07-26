@@ -27,7 +27,7 @@ print("Importing mrcnn model")
 from mrcnn import model as modellib, utils
 print("Successfully imported mrcnn model...")
 print("Importing mrcnn visualize")
-from mrcnn import visualize
+# from mrcnn import visualize
 print("Successfully imported mrcnn visualize...")
 
 
@@ -48,6 +48,8 @@ print("default log path:", DEFAULT_LOGS_DIR)
 #                                 HOW TO TRAIN THE MODEL WITH COCO WEIGHTS                                    #
 # python3 samples/CoinCointer/CoinCounter.py train --dataset=datasets/coin/ --weights=coco --logs=logs/CoinCounterLogs
 # *********************************************************************************************************** #
+# /groups/hachgrp/projects/dev-image-segmentation/scripts/JG_Mask_RCNN_Blueprint/samples/CoinCointer/CoinCounter.py train --dataset=/groups/hachgrp/projects/dev-image-segmentation/scripts/JG_Mask_RCNN_Blueprint/datasets/coin/ --weights=coco --logs=/groups/hachgrp/projects/dev-image-segmentation/scripts/JG_Mask_RCNN_Blueprint/logs/CoinCounterLogs
+# # *********************************************************************************************************** #
 
 # *********************************************************************************************************** #
 #                                      HOW TO CONTINUE TRAINING THE MODEL                                     #
@@ -90,7 +92,6 @@ class CoinConfig(Config):
 def get_available_devices():
     local_device_protos = device_lib.list_local_devices()
     return [[x.name for x in local_device_protos]]
-
 
 ############################################################
 #  Data-set
@@ -209,7 +210,7 @@ class CoinDataset(utils.Dataset):
         for i, p in enumerate(info["polygons"]):
             # Get indexes of pixels inside the polygon and set them to 1
 
-            rr, cc = CoinDataset.check_shape_of_annotation(p)
+            rr, cc = self.check_shape_of_annotation(p)
             if self.debug_polygons(p, rr, cc, i, mask, info):
                 mask[rr, cc, i] = 1
 
@@ -246,8 +247,7 @@ class CoinDataset(utils.Dataset):
             super(self.__class__, self).image_reference(image_id)
 
     # Checks which polygon was used in tagging the photo and returns the appropriate points
-    @staticmethod
-    def check_shape_of_annotation(p=None):
+    def check_shape_of_annotation(self, p=None):
         if p['name'] == 'polygon':
             rr, cc = skimage.draw.polygon(p['all_points_y'], p['all_points_x'])
         if p['name'] == 'polyline':
@@ -260,8 +260,7 @@ class CoinDataset(utils.Dataset):
         return rr, cc
 
     # Calculates the total value of the coins found in the photo
-    @staticmethod
-    def calculate_total_value(coins):
+    def calculate_total_value(self, coins):
         total_value = 0
 
         for coinCode in coins:
@@ -416,7 +415,7 @@ class OptimizeHyperparametersConfig(Config):
         self.WEIGHT_DECAY = np.random.uniform(wd_min, wd_max)
 
 
-def optimize_hyperparameters(benchmark_model, num_of_cycles=10, epochs=1):
+def optimize_hyperparameters(benchmark_model, num_of_cylces=10, epochs=1):
     """Giving a range of values, this function uses random search to approximate the optimal
         hyperparameters for a giving RCNN. The benchmark model is the initial config.
         Therefor; the first model tested will be using the hyperparameters specified
@@ -427,9 +426,9 @@ def optimize_hyperparameters(benchmark_model, num_of_cycles=10, epochs=1):
 
     log_path = benchmark_model.model_dir
 
-    learning_rate_range = [0.0005, 0.0015]
-    learning_momentum_range = [0.8, 0.99]
-    weight_decay_range = [0.00008, 0.00012]
+    learning_rate_range = [0.0005, 0.002]
+    learning_momentum_range = [0.5, 0.99]
+    weight_decay_range = [0.00007, 0.00014]
 
     hyperparameter_dict = {"lr": learning_rate_range, "lm": learning_momentum_range, "wd": weight_decay_range}
 
@@ -443,7 +442,7 @@ def optimize_hyperparameters(benchmark_model, num_of_cycles=10, epochs=1):
 
     model_hpo = benchmark_model
 
-    for index in range(num_of_cycles):
+    for index in range(num_of_cylces):
 
         """Train the model."""
         # Training dataset.
