@@ -73,7 +73,7 @@ class CoinConfig(Config):
 
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
-    IMAGES_PER_GPU = 2
+    IMAGES_PER_GPU = 3
 
     GPU_COUNT = 1
 
