@@ -8,6 +8,8 @@ import skimage.draw
 import skimage.color
 import skimage.io
 import glob
+import imgaug  # https://github.com/aleju/imgaug (pip3 install imgaug)
+
 
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../../")
@@ -521,25 +523,33 @@ def train(model):
     dataset_val.load_coin(args.dataset, "val")
     dataset_val.prepare()
 
-    # *** This training schedule is an example. Update to your needs ***
-    # Since we're using a very small dataset, and starting from
-    # COCO trained weights, we don't need to train too long. Also,
-    # no need to train all layers, just the heads should do it.
+    augmentation = imgaug.augmenters.Fliplr(0.5)
+
+    # Training - Stage 1
     print("Training network heads")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
-                epochs=50,
-                layers='heads')
+                epochs=40,
+                layers='heads',
+                augmentation=augmentation)
 
+    # Training - Stage 2
+    # Finetune layers from ResNet stage 4 and up
+    print("Fine tune Resnet stage 4 and up")
+    model.train(dataset_train, dataset_val,
+                learning_rate=config.LEARNING_RATE,
+                epochs=120,
+                layers='4+',
+                augmentation=augmentation)
+
+    # Training - Stage 3
     # Fine tune all layers
-    # Passing layers="all" trains all layers. You can also
-    # pass a regular expression to select which layers to
-    # train by name pattern.
-    print("Training all network nodes")
+    print("Fine tune all layers")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE / 10,
-                epochs=2,
-                layers="all")
+                epochs=160,
+                layers='all',
+                augmentation=augmentation)
 
 
 def color_splash(image, mask):
