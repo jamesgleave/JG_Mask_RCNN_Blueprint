@@ -83,7 +83,7 @@ class CoinConfig(Config):
     NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
 
     # Number of training steps per epoch
-    STEPS_PER_EPOCH = 1000
+    STEPS_PER_EPOCH = 100
 
     BACKBONE = "resnet101"
 
