@@ -529,7 +529,7 @@ def train(model):
     print("Training network heads")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
-                epochs=40,
+                epochs=30,
                 layers='heads',
                 augmentation=augmentation)
 
@@ -538,7 +538,7 @@ def train(model):
     print("Fine tune Resnet stage 4 and up")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
-                epochs=120,
+                epochs=60,
                 layers='4+',
                 augmentation=augmentation)
 
@@ -547,7 +547,7 @@ def train(model):
     print("Fine tune all layers")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE / 10,
-                epochs=160,
+                epochs=60,
                 layers='all',
                 augmentation=augmentation)
 
