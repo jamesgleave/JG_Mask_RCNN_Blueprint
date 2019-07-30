@@ -782,7 +782,7 @@ if __name__ == '__main__':
         description='Train Mask R-CNN to detect coins.')
     parser.add_argument("command",
                         metavar="<command>",
-                        help="'train' or 'splash' or 'inference' or optimizeHP")
+                        help="'train' or 'splash' or 'inference' or 'optimizeHP' or 'removeBG'")
     parser.add_argument('--dataset', required=False,
                         metavar="/path/to/coin/dataset/",
                         help='Directory of the coin dataset')

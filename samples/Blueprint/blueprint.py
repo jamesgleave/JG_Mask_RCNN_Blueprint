@@ -6,6 +6,7 @@ import numpy as np
 import skimage.draw
 import skimage.color
 import skimage.io
+import keras
 import glob
 
 # Root directory of the project
@@ -168,21 +169,21 @@ class BlueprintDataset(utils.Dataset):
             # Get indexes of pixels inside the polygon and set them to 1
 
             rr, cc = self.check_shape_of_annotation(p)
-            if self.debug_polygons(p, rr, cc, i, mask, info):
+            if self.debug_polygons(rr, cc, i, mask, info):
                 mask[rr, cc, i] = 1
 
         # Return mask, and array of class IDs of each instance. We have six
         # possible instances, so we give the class ID's the list of blueprint variants in each image
         return mask.astype(np.bool), np.array(image_info['blueprintVariant'])
 
-    def debug_polygons(self, p, rr, cc, i, mask, info):
+    def debug_polygons(self, rr, cc, i, mask, info):
         """ If there is an issue of with one or more photos in a dataset,
         this will ensure it does not crash the program"""
 
         try:
-            mask[rr, cc]
+            assert mask[rr, cc]
             return True
-        except:
+        except ArithmeticError:
             if i == 0:
                 print("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                       "\n!!!!!!ERROR!!ERROR!!ERROR!!ERROR!!ERROR!!!!!!"
@@ -241,12 +242,100 @@ class BlueprintDataset(utils.Dataset):
         return
 
 
+# *************************************************************** #
+# Hyperparameter Optimization                                     #
+# *************************************************************** #
+
+class MaskRCNN(modellib.MaskRCNN):
+    def __init__(self, mode, model_dir, config):
+        super().__init__(mode=mode, config=config, model_dir=model_dir)
+        self.history = keras.callbacks.History()
+
+    def train(self, train_dataset, val_dataset, learning_rate, epochs, layers,
+              augmentation=None, custom_callbacks=None, no_augmentation_sources=None):
+
+        assert self.mode == "training", "Create model in training mode."
+
+        # Pre-defined layer regular expressions
+        layer_regex = {
+            # all layers but the backbone
+            "heads": r"(mrcnn\_.*)|(rpn\_.*)|(fpn\_.*)",
+            # From a specific Resnet stage and up
+            "3+": r"(res3.*)|(bn3.*)|(res4.*)|(bn4.*)|(res5.*)|(bn5.*)|(mrcnn\_.*)|(rpn\_.*)|(fpn\_.*)",
+            "4+": r"(res4.*)|(bn4.*)|(res5.*)|(bn5.*)|(mrcnn\_.*)|(rpn\_.*)|(fpn\_.*)",
+            "5+": r"(res5.*)|(bn5.*)|(mrcnn\_.*)|(rpn\_.*)|(fpn\_.*)",
+            # All layers
+            "all": ".*",
+        }
+        if layers in layer_regex.keys():
+            layers = layer_regex[layers]
+
+        # Data generators
+        train_generator = modellib.data_generator(train_dataset, self.config, shuffle=True,
+                                                  augmentation=augmentation,
+                                                  batch_size=self.config.BATCH_SIZE,
+                                                  no_augmentation_sources=no_augmentation_sources)
+        val_generator = modellib.data_generator(val_dataset, self.config, shuffle=True,
+                                                batch_size=self.config.BATCH_SIZE)
+
+        # Create log_dir if it does not exist
+        if not os.path.exists(self.log_dir):
+            os.makedirs(self.log_dir)
+
+        # Callbacks
+        callbacks = [
+            keras.callbacks.TensorBoard(log_dir=self.log_dir,
+                                        histogram_freq=0, write_graph=True, write_images=False),
+            keras.callbacks.ModelCheckpoint(self.checkpoint_path,
+                                            verbose=0, save_weights_only=True),
+        ]
+
+        # Add custom callbacks to the list
+        if custom_callbacks:
+            callbacks += custom_callbacks
+
+        # Train
+        modellib.log("\nStarting at epoch {}. LR={}\n".format(self.epoch, learning_rate))
+        modellib.log("Checkpoint Path: {}".format(self.checkpoint_path))
+        self.set_trainable(layers)
+        self.compile(learning_rate, self.config.LEARNING_MOMENTUM)
+
+        # Work-around for Windows: Keras fails on Windows when using
+        # multiprocessing workers. See discussion here:
+        # https://github.com/matterport/Mask_RCNN/issues/13#issuecomment-353124009
+        if os.name is 'nt':
+            workers = 0
+        else:
+            workers = modellib.multiprocessing.cpu_count()
+
+        self.history = self.keras_model.fit_generator(
+            train_generator,
+            initial_epoch=self.epoch,
+            epochs=epochs,
+            steps_per_epoch=self.config.STEPS_PER_EPOCH,
+            callbacks=callbacks,
+            validation_data=val_generator,
+            validation_steps=self.config.VALIDATION_STEPS,
+            max_queue_size=100,
+            workers=workers,
+            use_multiprocessing=True,
+        )
+        self.epoch = max(self.epoch, epochs)
+
+
 class OptimizeHyperparametersConfig(Config):
 
     """Creates a config for the process of hyperparameter optimization"""
 
-    STEPS_PER_EPOCH = 1
-    VALIDATION_STEPS = 1
+    STEPS_PER_EPOCH = 100
+    VALIDATION_STEPS = 50
+
+    # We use a GPU with 12GB memory, which can fit two images.
+    # Adjust down if you use a smaller GPU.
+    IMAGES_PER_GPU = 1
+
+    # Number of classes (including background)
+    NUM_CLASSES = 1 + 6  # Background + penny + nickle + dime + quarter + loonie + toonie
 
     def set_params(self, hyperparameters, index):
 
@@ -266,7 +355,7 @@ class OptimizeHyperparametersConfig(Config):
         self.WEIGHT_DECAY = np.random.uniform(wd_min, wd_max)
 
 
-def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs=1):
+def optimize_hyperparameters(benchmark_model, num_of_cylces=10, epochs=1):
     """Giving a range of values, this function uses random search to approximate the optimal
         hyperparameters for a giving RCNN. The benchmark model is the initial config.
         Therefor; the first model tested will be using the hyperparameters specified
@@ -274,6 +363,8 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
     """
 
     config_list = []
+
+    log_path = benchmark_model.model_dir
 
     learning_rate_range = [0.0005, 0.0015]
     learning_momentum_range = [0.81, 0.99]
@@ -290,8 +381,6 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
     benchmark_model.config.NAME = "Benchmark"
 
     model_hpo = benchmark_model
-    print(model_hpo.keras_model.get_losses_for())
-    print(model_hpo.keras_model.loss)
 
     for index in range(num_of_cylces):
 
@@ -314,30 +403,40 @@ def optimize_hyperparameters(log_path, benchmark_model, num_of_cylces=30, epochs
         print("")
 
         print("Training network heads of", index)
+
         model_hpo.train(dataset_train, dataset_val,
                         learning_rate=config.LEARNING_RATE,
                         epochs=epochs,
                         layers='heads')
 
-        loss = model_hpo.keras_model.loss
-        print("loss:", loss)
-
+        history = model_hpo.history
+        loss = history.history['loss']
         loss_config_name = (loss, model_hpo.config, model_hpo.config.NAME)
         config_list.append(loss_config_name)
 
         config_hpo.set_params(hyperparameter_dict, index)
 
-        model_hpo = modellib.MaskRCNN(mode="training", config=config_hpo,
-                                      model_dir=log_path)
+        print("Training", model_hpo.config.NAME, "Successful\n********************************************************"
+              , "\nThe total loss was:", loss)
+
+        model_hpo = MaskRCNN(mode="training", config=config_hpo,
+                             model_dir=log_path)
+
+        print("Now training", model_hpo.config.NAME, "\n\n")
 
     opt_hyperparameters = config_list[0]
     for c in config_list:
         loss, con, name = c
+        print("Name:", name, "\nLoss:", loss, "\nConfig:", con, "\n***********************************************\n\n")
         if loss < opt_hyperparameters[0]:
             opt_hyperparameters = c
-    print("The optimal hyperparameters are approximately", opt_hyperparameters[2])
+    print("The optimal hyperparameters are approximately", opt_hyperparameters[1])
     print("With a loss of", opt_hyperparameters[0])
-    print("The config was", opt_hyperparameters[3])
+    print("The config was", opt_hyperparameters[2])
+
+
+# *************************************************************** #
+# *************************************************************** #
 
 
 def train(model):
@@ -378,6 +477,31 @@ def color_splash(image, mask):
     else:
         splash = gray.astype(np.uint8)
     return splash
+
+
+def remove_background(image, mask):
+    """Blacks out all objects that are not masked.
+    image: RGB image [height, width, 3]
+    mask: instance segmentation mask [height, width, instance count]
+
+    Returns result image.
+    """
+    # Make a blacked out copy of the image. The blacked out copy still
+    # has 3 RGB channels, though.
+    blackout = skimage.color.gray2rgb(skimage.color.rgb2gray(image)) * 0
+
+    blackout = np.array(blackout)
+    image = np.array(image)
+
+    # Copy color pixels from the original color image where mask is set
+    if mask.shape[-1] > 0:
+        # We're treating all instances as one, so collapse the mask into one layer
+        mask = (np.sum(mask, -1, keepdims=True) >= 1)
+        augmented_image = np.where(mask, image, blackout).astype(np.uint8)
+    else:
+        augmented_image = blackout.astype(np.uint8)
+
+    return augmented_image
 
 
 def detect_and_color_splash(model, image_path=None, video_path=None):
@@ -495,7 +619,7 @@ if __name__ == '__main__':
         description='Train Mask R-CNN to detect blueprints.')
     parser.add_argument("command",
                         metavar="<command>",
-                        help="'train' or 'splash' or 'inference' or optimizeHP")
+                        help="'train' or 'splash' or 'inference' or 'optimizeHP' or 'removeBG'")
     parser.add_argument('--dataset', required=False,
                         metavar="/path/to/YOUR/dataset/",
                         help='Directory of the YOUR dataset')
@@ -523,6 +647,9 @@ if __name__ == '__main__':
     elif args.command == "inference":
         assert args.image,\
                "Provide --image=(image path) or (directory path)"
+    elif args.command == "removeBG":
+        assert args.image,\
+               "Provide --image=(image path)"
 
     print("Weights: ", args.weights)
     print("Dataset: ", args.dataset)
@@ -545,8 +672,8 @@ if __name__ == '__main__':
         model = modellib.MaskRCNN(mode="training", config=config,
                                   model_dir=args.logs)
     elif args.command == "optimizeHP":
-        model = modellib.MaskRCNN(mode="training", config=config,
-                                  model_dir=args.logs)
+        model = MaskRCNN(mode="training", config=config,
+                         model_dir=args.logs)
     else:
         model = modellib.MaskRCNN(mode="inference", config=config,
                                   model_dir=args.logs)
@@ -583,10 +710,13 @@ if __name__ == '__main__':
     elif args.command == "splash":
         detect_and_color_splash(model, image_path=args.image,
                                 video_path=args.video)
+    elif args.command == "removeBG":
+        detect_and_remove_background(model, image_path=args.image,
+                                     video_path=args.video)
     elif args.command == "inference":
         inference(model_inf=model, path=args.image)
     elif args.command == "optimizeHP":
-        optimize_hyperparameters(log_path=args.logs, benchmark_model=model)
+        optimize_hyperparameters(benchmark_model=model)
     else:
         print("'{}' is not recognized. "
               "Use 'train' or 'splash'".format(args.command))
