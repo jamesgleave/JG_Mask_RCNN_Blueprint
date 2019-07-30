@@ -11,7 +11,7 @@ The repository contains:
  
 # About the blueprint
 
-The goal of this repository is to create system for generalized and easily configurable object detection and segmentation. The blueprint class streamlines the processes of training, testing and inference.
+The goal of this repository is to create a system for generalized and easily configurable object detection and segmentation. The blueprint class streamlines the processes of training, testing and inference.
 
 
 # Getting started
