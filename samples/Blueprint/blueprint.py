@@ -174,7 +174,7 @@ class BlueprintDataset(utils.Dataset):
 
         # Return mask, and array of class IDs of each instance. We have six
         # possible instances, so we give the class ID's the list of blueprint variants in each image
-        return mask.astype(np.bool), np.array(image_info['blueprintVariant'])
+        return mask.astype(np.bool), np.ones([mask.shape[-1]], dtype=np.int32)
 
     def debug_polygons(self, rr, cc, i, mask, info):
         """ If there is an issue of with one or more photos in a dataset,
